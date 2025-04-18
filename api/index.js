@@ -1,6 +1,3 @@
-// para testar localmente
-// rode npm run start
-
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
@@ -14,8 +11,7 @@ app.use(express.json())
 
 app.use('/calendario', calendario)
 
-const porta = process.env.PORTA_HOST_API
-const servidor = process.env.SERVIDOR_HOST_API
+const porta = process.env.PORT || 3000
 app.listen(porta, () => {
-  console.log(`🚀 Servidor rodando em ${servidor}`)
-});
+  console.log(`🚀 Servidor rodando na porta ${porta}`)
+})
