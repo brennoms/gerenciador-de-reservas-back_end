@@ -6,7 +6,11 @@ export default async function handler (req, res) {
         return  res.status(405).end()
 
     const token_invert_texto = process.env.TOKEN_INVERT_TEXTO
-    const { ano, estado } = req.query
+    let { ano, estado } = req.query
+    
+    if (ano === undefined) {
+      ano = new Date().getFullYear()
+    }
     
 
     let feriados = {}
