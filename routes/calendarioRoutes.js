@@ -1,7 +1,7 @@
-const express = require('express');
-const router = express.Router();
-const calendario = require('../controllers/calendario');
+import calendario from '../controllers/calendario.js'
+import express from 'express'
 
-router.get('/calendario', calendario);
 
-module.exports = router;
+const router = express.Router()
+router.get('/calendario', calendario)
+export default router
