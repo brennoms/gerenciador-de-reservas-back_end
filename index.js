@@ -9,7 +9,6 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-console.log(calendarioRoutes)
 app.use('/api', calendarioRoutes)
 
 const porta = process.env.PORT || 3000
