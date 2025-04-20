@@ -1,5 +1,7 @@
 import bcryptjs from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 import { encontrarPorEmail, criarUsuario } from '../models/usuarioModel.js'
+
 
 export async function cadastrarUsuario(req, res) {
   const { nome, email, senha } = req.body
@@ -19,6 +21,7 @@ export async function cadastrarUsuario(req, res) {
   res.status(201).json({ mensagem: 'Usuário cadastrado com sucesso.' })
 }
 
+
 export async function pegarUsuario (req, res) {
   const { email } = req.params
   const usuario = await encontrarPorEmail (email)
@@ -26,5 +29,36 @@ export async function pegarUsuario (req, res) {
     return res.json(usuario)
   } else {
     return res.json({erro:"email não existe"})
+  }
+}
+
+
+export async function loginUsuario(req, res) {
+  const { email, senha } = req.body
+
+  try {
+    const usuario = await encontrarPorEmail(email)
+
+    if (!usuario) {
+      return res.status(401).json({ erro: 'Usuário não encontrado' })
+    }
+
+    const senhaCorreta = await bcrypt.compare(senha, usuario.senha)
+
+    if (!senhaCorreta) {
+      return res.status(401).json({ erro: 'Senha incorreta' })
+    }
+
+    const token = jwt.sign(
+      { user_id: usuario._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '2h' }
+    )
+
+    res.json({ mensagem: 'Login realizado com sucesso', token })
+
+  } catch (erro) {
+    console.error(erro)
+    res.status(500).json({ erro: 'Erro ao fazer login' })
   }
 }
