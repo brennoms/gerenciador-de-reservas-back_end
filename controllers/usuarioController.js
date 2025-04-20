@@ -1,7 +1,7 @@
 import bcryptjs from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { JWT_SECRET } from '../config.js'
-import { encontrarPorEmail, criarUsuario } from '../models/usuarioModel.js'
+import { encontrarPorEmail, encontrarPorId, criarUsuario, excluirUsuario } from '../models/usuarioModel.js'
 
 
 export async function cadastrarUsuario(req, res) {
@@ -50,5 +50,30 @@ export async function loginUsuario(req, res) {
   } catch (erro) {
     console.error(erro)
     res.status(500).json({ erro: 'Erro ao fazer login' })
+  }
+}
+
+export async function pegarUsuario (req, res) {
+  const id = req.usuario.user_id
+  try {
+    const usuario = await encontrarPorId(id)
+    if (!usuario) {
+      return res.status(404).json({erro:'usuario não existe'})
+    }
+    return res.json(usuario)
+  } catch (erro) {
+    console.log(erro)
+    return res.status(500).json({erro:'erro interno no servidor'})
+  }
+}
+
+export async function removerUsuario (req, res) {
+  const id = req.usuario.user_id
+  try {
+    await excluirUsuario(id)
+    return res.json({mensagem:'usuario excluido com sucesso'})
+  } catch (erro) {
+    console.log(erro)
+    return res.json({erro:'erro ao excluir usuario'})
   }
 }
