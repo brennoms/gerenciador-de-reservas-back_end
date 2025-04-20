@@ -3,9 +3,9 @@ import { buscarImoveis, buscarImovel, criarImovel, excluirImovel } from '../mode
 
 
 export async function pegarImoveis(req, res) {
-  const { usuario_id } = req.usuario
+  const { user_id } = req.usuario
   try {
-    const imoveis = await buscarImoveis(usuario_id)
+    const imoveis = await buscarImoveis(user_id)
     return res.json(imoveis)
   } catch (erro) {
     console.error(erro)
