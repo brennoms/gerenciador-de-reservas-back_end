@@ -33,7 +33,8 @@ export async function adicionarImovel(req, res) {
     _id: new ObjectId(),
     nome: nome || 'não fornecido',
     imagem: imagem || 'não fornecido',
-    endereco: endereco || 'não fornecido'
+    endereco: endereco || 'não fornecido',
+    reservas: []
   }
 
   try {
