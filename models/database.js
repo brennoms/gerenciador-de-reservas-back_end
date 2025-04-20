@@ -1,16 +1,14 @@
 import { MongoClient } from 'mongodb'
-import dotenv from 'dotenv'
+import { MONGO_URI, DB_NOME } from '../config.js'
 
-dotenv.config()
 
-const client = new MongoClient(process.env.URI_MONGODB)
+const client = new MongoClient(MONGO_URI)
 
 let db
-
 async function connect() {
   if (!db) {
     await client.connect()
-    db = client.db(process.env.DB_NAME)
+    db = client.db(DB_NOME)
   }
   return db
 }

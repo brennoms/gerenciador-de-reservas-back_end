@@ -1,5 +1,6 @@
 import bcryptjs from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import { JWT_SECRET } from '../config.js'
 import { encontrarPorEmail, criarUsuario } from '../models/usuarioModel.js'
 
 
@@ -16,20 +17,9 @@ export async function cadastrarUsuario(req, res) {
   }
 
   const senhaCriptografada = await bcryptjs.hash(senha, 10)
-  await criarUsuario({ nome, email, senha: senhaCriptografada })
+  await criarUsuario({ nome, email, senha: senhaCriptografada, imoveis: [] })
 
   res.status(201).json({ mensagem: 'Usuário cadastrado com sucesso.' })
-}
-
-
-export async function pegarUsuario (req, res) {
-  const { email } = req.params
-  const usuario = await encontrarPorEmail (email)
-  if (usuario) {
-    return res.json(usuario)
-  } else {
-    return res.json({erro:"email não existe"})
-  }
 }
 
 
@@ -43,7 +33,7 @@ export async function loginUsuario(req, res) {
       return res.status(401).json({ erro: 'Usuário não encontrado' })
     }
 
-    const senhaCorreta = await bcrypt.compare(senha, usuario.senha)
+    const senhaCorreta = await bcryptjs.compare(senha, usuario.senha)
 
     if (!senhaCorreta) {
       return res.status(401).json({ erro: 'Senha incorreta' })
@@ -51,7 +41,7 @@ export async function loginUsuario(req, res) {
 
     const token = jwt.sign(
       { user_id: usuario._id },
-      process.env.JWT_SECRET,
+      JWT_SECRET,
       { expiresIn: '2h' }
     )
 
