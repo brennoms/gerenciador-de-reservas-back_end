@@ -5,6 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
     "dev": "node index.js",
     "dev-cel": "../sync-termux.sh && node index.js",
     "start": "node index.js"
@@ -20,5 +23,11 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.15.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0",                
+    "prettier": "^2.0.0",              
+    "eslint-config-prettier": "^8.0.0", 
+    "eslint-plugin-prettier": "^4.0.0"  
   }
 }
