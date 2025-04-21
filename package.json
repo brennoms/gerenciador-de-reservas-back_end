@@ -25,9 +25,15 @@
     "mongodb": "^6.15.0"
   },
   "devDependencies": {
-    "eslint": "^8.0.0",                
-    "prettier": "^2.0.0",              
-    "eslint-config-prettier": "^8.0.0", 
-    "eslint-plugin-prettier": "^4.0.0"  
+    "eslint": "^8.0.0",
+    "prettier": "^2.0.0",
+    "eslint-config-prettier": "^8.0.0",
+    "eslint-plugin-prettier": "^4.0.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json}": [
+      "eslint",
+      "prettier --check"
+    ]
   }
 }
