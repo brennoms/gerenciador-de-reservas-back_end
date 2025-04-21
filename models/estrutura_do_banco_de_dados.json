@@ -1,0 +1,33 @@
+{
+  "usuarios (coleção)": [
+    {
+      "_id": "ObjectId() -> gerado pelo MondoDB",
+      "nome": "",
+      "email": "//index unico",
+      "senha": "senha cryptografada bcriptyjs"
+    }
+  ],
+
+  "imoveis (coleção)": [
+    {
+      "_id": "ObjectId() -> gerado pelo MondoDB",
+      "usuarioId": "//index",
+      "nome": "",
+      "endereco": ""
+    }
+  ],
+
+  "reservas (coleção)": [
+    {
+      "_id": "ObjectId() -> criado pelo MDB",
+      "usuarioId": "//index",
+      "imovelId": "//index",
+      "data": "",
+      "nome": "",
+      "contato": "",
+      "entrada": "",
+      "sinal": "",
+      "valor": ""
+    }
+  ]
+}
