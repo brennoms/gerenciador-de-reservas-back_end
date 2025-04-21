@@ -1,7 +1,7 @@
-import dotenv from 'dotenv'
-dotenv.config()
+import dotenv from 'dotenv';
+dotenv.config();
 
-export const JWT_SECRET = process.env.JWT_SECRET
-export const PORT = process.env.PORT || 3000
-export const MONGO_URI = process.env.MONGO_URI
-export const DB_NOME = process.env.DB_NOME
+export const JWT_SECRET = process.env.JWT_SECRET;
+export const PORT = process.env.PORT || 3000;
+export const MONGO_URI = process.env.MONGO_URI;
+export const DB_NOME = process.env.DB_NOME;
