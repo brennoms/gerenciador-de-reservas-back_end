@@ -35,7 +35,7 @@ export async function loginUsuario(req, res) {
       return res.status(401).json({ erro: 'Senha incorreta' });
     }
     const token = jwt.sign({ usuario_id: usuario._id }, JWT_SECRET, { expiresIn: '2h' });
-    res.json({ mensagem: 'Login realizado com sucesso', token });
+    return res.json({ mensagem: 'Login realizado com sucesso', token });
   } catch (erro) {
     console.error(erro);
     return res.status(500).json({ erro: 'Erro ao fazer login' });

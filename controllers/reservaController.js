@@ -28,9 +28,10 @@ export async function buscarReservas(req, res) {
 export async function deletarReservas(req, res) {
   const { user_id } = req.usuario;
   const { imovel_id } = req.params;
-  const { reservas_ids } = req.body;
+  const { reservas } = req.body;
+  const reservas_id = reservas.map(reserva => reserva._id);
   try {
-    await excluirReservas(user_id, imovel_id, reservas_ids);
+    await excluirReservas(user_id, imovel_id, reservas_id);
     return res.json({ mensagem: 'reservas canceladas' });
   } catch (erro) {
     console.log(erro);

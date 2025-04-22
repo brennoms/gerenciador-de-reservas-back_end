@@ -6,7 +6,7 @@ export async function pegarImoveis(req, res) {
   const { user_id } = req.usuario;
   try {
     const imoveis = await buscarImoveis(user_id);
-    return res.json(imoveis);
+    return res.json({ imoveis });
   } catch (erro) {
     console.error(erro);
     return res.status(500).json({ erro: 'Erro ao buscar imóveis' });
