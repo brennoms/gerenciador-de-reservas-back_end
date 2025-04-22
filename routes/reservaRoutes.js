@@ -8,8 +8,8 @@ import {
 } from '../controllers/reservaController.js';
 
 const router = express.Router();
-router.get('/:imovel_id/reservas', autenticarToken, buscarReservas);
-router.post('/:imovel_id/reservas', autenticarToken, fazerReservas);
-router.delete('/:imovel_id/reservas', autenticarToken, deletarReservas);
+router.get('/reservas/:imovel_id', autenticarToken, buscarReservas);
+router.post('/reservas/:imovel_id', autenticarToken, fazerReservas);
+router.delete('/reservas/:imovel_id', autenticarToken, deletarReservas);
 
 export default router;

@@ -12,9 +12,9 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api', calendarioRoutes);
-app.use('/api', reservaRoutes);
 app.use('/api', usuarioRoutes);
-app.use('/api', imoveisRoutes);
+app.use('/api/usuario', imoveisRoutes);
+app.use('/api/usuario', reservaRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
