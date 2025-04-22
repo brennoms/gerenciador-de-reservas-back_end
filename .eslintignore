@@ -5,3 +5,4 @@ coverage
 *.min.js
 .env
 *.json
+*.test.js

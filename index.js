@@ -1,6 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import { PORT } from './config.js';
 
 import calendarioRoutes from './routes/calendarioRoutes.js';
 import reservaRoutes from './routes/reservaRoutes.js';
@@ -16,6 +15,4 @@ app.use('/api', usuarioRoutes);
 app.use('/api/usuario', imoveisRoutes);
 app.use('/api/usuario', reservaRoutes);
 
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando na porta ${PORT}`);
-});
+export default app;

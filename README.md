@@ -94,6 +94,7 @@ DELETE /api/usuario/reservas/:imovel_id
 ### Coleções (MongoDB)
 
 #### `usuarios`
+
 ```http
 {
    "_id": "ObjectId() -> gerado pelo MondoDB",
@@ -105,6 +106,7 @@ DELETE /api/usuario/reservas/:imovel_id
 ```
 
 #### `imoveis`
+
 ```http
 {
    "_id": "ObjectId() -> gerado pelo MondoDB",
@@ -116,6 +118,7 @@ DELETE /api/usuario/reservas/:imovel_id
 ```
 
 #### `reservas`
+
 ```http
 {
    "_id": "ObjectId() -> criado pelo MDB",
@@ -146,11 +149,13 @@ DELETE /api/usuario/reservas/:imovel_id
 ### documentos
 
 #### `.env`
+
 ```http
 MONGO_URI={string de conexão}
 DB_NOME={nome do banco de dados}
 JWT_SECRET={palavra passe}
 ```
+
 ---
 
 ## 🛠️ Tecnologias Utilizadas
