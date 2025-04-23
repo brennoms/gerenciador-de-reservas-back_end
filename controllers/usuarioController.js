@@ -13,13 +13,18 @@ export async function cadastrarUsuario(req, res) {
   if (!nome || !email || !senha) {
     return res.status(400).json({ erro: 'Todos os campos são obrigatórios.' });
   }
-  const existente = await encontrarPorEmail(email);
-  if (existente) {
-    return res.status(400).json({ erro: 'E-mail já cadastrado.' });
+  try {
+    const existente = await encontrarPorEmail(email);
+    if (existente) {
+      return res.status(400).json({ erro: 'E-mail já cadastrado.' });
+    }
+    const senhaCriptografada = await bcryptjs.hash(senha, 10);
+    await criarUsuario({ nome, email, senha: senhaCriptografada, imoveis: [] });
+    return res.status(201).json({ mensagem: 'Usuário cadastrado com sucesso.' });
+  } catch (erro) {
+    console.error(erro);
+    return res.status(500).json({ erro: 'erro interno no servidor' });
   }
-  const senhaCriptografada = await bcryptjs.hash(senha, 10);
-  await criarUsuario({ nome, email, senha: senhaCriptografada, imoveis: [] });
-  return res.status(201).json({ mensagem: 'Usuário cadastrado com sucesso.' });
 }
 
 export async function loginUsuario(req, res) {
@@ -36,21 +41,21 @@ export async function loginUsuario(req, res) {
     const token = jwt.sign({ usuario_id: usuario._id }, process.env.JWT_SECRET, {
       expiresIn: '2h',
     });
-    return res.json({ mensagem: 'Login realizado com sucesso', token });
+    return res.status(200).json({ mensagem: 'Login realizado com sucesso', token });
   } catch (erro) {
     console.error(erro);
-    return res.status(500).json({ erro: 'Erro ao fazer login' });
+    return res.status(500).json({ erro: 'erro interno no servidor' });
   }
 }
 
 export async function pegarUsuario(req, res) {
-  const id = req.usuario.user_id;
+  const id = req.usuario.usuario_id;
   try {
     const usuario = await encontrarPorId(id);
     if (!usuario) {
       return res.status(404).json({ erro: 'usuario não existe' });
     }
-    return res.json(usuario);
+    return res.status(200).json(usuario);
   } catch (erro) {
     console.log(erro);
     return res.status(500).json({ erro: 'erro interno no servidor' });
@@ -58,12 +63,12 @@ export async function pegarUsuario(req, res) {
 }
 
 export async function removerUsuario(req, res) {
-  const id = req.usuario.user_id;
+  const id = req.usuario.usuario_id;
   try {
     await excluirUsuario(id);
-    return res.json({ mensagem: 'usuario excluido com sucesso' });
+    return res.status(200).json({ mensagem: 'usuario excluido com sucesso' });
   } catch (erro) {
     console.log(erro);
-    return res.json({ erro: 'erro ao excluir usuario' });
+    return res.status(500).json({ erro: 'erro interno no servidor' });
   }
 }

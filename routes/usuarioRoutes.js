@@ -9,9 +9,9 @@ import {
 } from '../controllers/usuarioController.js';
 
 const router = express.Router();
-router.get('/usuario/me', autenticarToken, pegarUsuario);
-router.delete('/usuario/me', autenticarToken, removerUsuario);
-router.post('/usuario/cadastro', cadastrarUsuario);
-router.post('/usuario/login', loginUsuario);
+router.get('/usuarios/me', autenticarToken, pegarUsuario);
+router.delete('/usuarios/me', autenticarToken, removerUsuario);
+router.post('/usuarios/cadastro', cadastrarUsuario);
+router.post('/usuarios/login', loginUsuario);
 
 export default router;
