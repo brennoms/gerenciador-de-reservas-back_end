@@ -1,7 +1,6 @@
 import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-import { JWT_SECRET } from '../config.js';
 import {
   encontrarPorEmail,
   encontrarPorId,
@@ -34,7 +33,9 @@ export async function loginUsuario(req, res) {
     if (!senhaCorreta) {
       return res.status(401).json({ erro: 'Senha incorreta' });
     }
-    const token = jwt.sign({ usuario_id: usuario._id }, JWT_SECRET, { expiresIn: '2h' });
+    const token = jwt.sign({ usuario_id: usuario._id }, process.env.JWT_SECRET, {
+      expiresIn: '2h',
+    });
     return res.json({ mensagem: 'Login realizado com sucesso', token });
   } catch (erro) {
     console.error(erro);
