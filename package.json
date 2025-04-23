@@ -37,5 +37,10 @@
       "eslint",
       "prettier --check"
     ]
+  },
+  "jest": {
+    "setupFiles": [
+      "<rootDir>/tests/jest.setup.js"
+    ]
   }
 }
