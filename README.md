@@ -6,133 +6,179 @@ Esta API foi desenvolvida para gerenciar dados de um sistema de **gerenciamento 
 
 ---
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
-### 📦 Rotas
+## Rotas
 
-#### `/api` (em desenvolvimento)
+### ✅ Status
 
-```http
-GET /api
-- Rota inicial, retorna o status da API
-```
+### `GET /api`
 
-#### `/api/usuario`
-
-```http
-GET /api/usuario
-- Retorna o usuário logado
-- Header: Authorization
-
-DELETE /api/usuario
-- Remove o usuário logado
-- Header: Authorization
-```
-
-#### `/api/usuario/login`
-
-```http
-POST /api/usuario/login
-- Retorna token de acesso
-- Body: { email, senha }
-- Resposta: { token }
-```
-
-#### `/api/usuario/cadastro`
-
-```http
-POST /api/usuario/cadastro
-- Cria um novo usuário
-- Body: { nome, email, senha }
-```
-
-#### `/api/usuario/imoveis`
-
-```http
-GET /api/usuario/imoveis
-- Retorna imóveis do usuário
-- Header: Authorization
-
-POST /api/usuario/imoveis
-- Cria novo imóvel
-- Header: Authorization
-- Body: { nome, imagem, endereço }
-```
-
-#### `/api/usuario/imoveis/:imovel_id`
-
-```http
-GET /api/usuario/imoveis/:imovel_id
-- Retorna detalhes de um imóvel
-- Header: Authorization
-
-DELETE /api/usuario/imoveis/:imovel_id
-- Remove imóvel
-- Header: Authorization
-```
-
-#### `/api/usuario/reservas/:imovel_id`
-
-```http
-GET /api/usuario/reservas/:imovel_id
-- Retorna as reservas do imóvel
-- Header: Authorization
-
-POST /api/usuario/reservas/:imovel_id
-- Cria nova reserva
-- Header: Authorization
-- Body: { reservas }
-
-DELETE /api/usuario/reservas/:imovel_id
-- Remove reservas
-- Header: Authorization
-- Body: { reservas }
-```
+- Verifica se a API está online.
+- **Resposta esperada:**
+  > ```json
+  > { "status": "API rodando" }
+  > ```
 
 ---
 
-### Coleções (MongoDB)
+### 👤 Usuários
 
-#### `usuarios`
+### `POST /api/usuarios/cadastro`
 
-```http
-{
-   "_id": "ObjectId() -> gerado pelo MondoDB",
-   "nome": "",
-   "email": "", //index unico
-   "senha": "senha cryptografada bcriptyjs"
-},
-...
-```
+- Cadastra um novo usuário.
+- **Body:**
+  > ```json
+  > {
+  >   "nome": "João",
+  >   "email": "joao@exemplo.com",
+  >   "senha": "senha123"
+  > }
+  > ```
 
-#### `imoveis`
+### `POST /api/usuarios/login`
 
-```http
-{
-   "_id": "ObjectId() -> gerado pelo MondoDB",
-   "usuarioId": "", //index
-   "nome": "",
-   "endereco": ""
-},
-...
-```
+- Faz login e retorna um token JWT.
+- **Body:**
+  > ```json
+  > {
+  >   "email": "joao@exemplo.com",
+  >   "senha": "senha123"
+  > }
+  > ```
+- **Resposta:**
+  > ```json
+  > { "token": "JWT_TOKEN" }
+  > ```
 
-#### `reservas`
+### `GET /api/usuarios/me`
 
-```http
-{
-   "_id": "ObjectId() -> criado pelo MDB",
-   "usuarioId": "", //index
-   "imovelId": "", //index
-   "data": "",
-   "nome": "",
-   "contato": "",
-   "entrada": "",
-   "sinal": "",
-   "valor": ""
-},
-...
-```
+- Retorna os dados do usuário logado.
+- **Header:** `Authorization: Bearer <token>`
+
+### `DELETE /api/usuarios/me`
+
+- Remove o próprio usuário.
+- **Header:** `Authorization: Bearer <token>`
+
+---
+
+### 🏠 Imóveis
+
+### `GET /api/imoveis`
+
+- Lista os imóveis do usuário logado.
+- **Header:** `Authorization: Bearer <token>`
+
+### `POST /api/imoveis`
+
+- Cria um novo imóvel.
+- **Header:** `Authorization: Bearer <token>`
+- **Body:**
+  > ```json
+  > {
+  >   "nome": "Casa de Praia",
+  >   "imagem": "https://imagem.com/casa.jpg",
+  >   "endereço": "Rua do Sol, 123"
+  > }
+  > ```
+
+### `GET /api/imoveis/:imovel_id`
+
+- Retorna detalhes de um imóvel.
+- **Header:** `Authorization: Bearer <token>`
+
+### `DELETE /api/imoveis/:imovel_id`
+
+- Remove um imóvel.
+- **Header:** `Authorization: Bearer <token>`
+
+---
+
+### 📅 Reservas
+
+### `GET /api/reservas`
+
+- Lista todas as reservas do usuário logado (em todos os imóveis).
+- **Header:** `Authorization: Bearer <token>`
+
+### `GET /api/imoveis/:imovel_id/reservas`
+
+- Lista as reservas de um imóvel.
+- **Header:** `Authorization: Bearer <token>`
+
+### `POST /api/imoveis/:imovel_id/reservas`
+
+- Cria uma ou mais reservas.
+- **Header:** `Authorization: Bearer <token>`
+- **Body:**
+  > ```json
+  > [
+  >   {
+  >     "dataInicio": "2025-05-01",
+  >     "dataFim": "2025-05-03"
+  >   }
+  > ]
+  > ```
+
+### `DELETE /api/imoveis/:imovel_id/reservas`
+
+- Remove reservas específicas.
+- **Header:** `Authorization: Bearer <token>`
+- **Body:**
+  > ```json
+  > [
+  >   {
+  >     "dataInicio": "2025-05-01",
+  >     "dataFim": "2025-05-03"
+  >   }
+  > ]
+  > ```
+
+---
+
+## Coleções (MongoDB)
+
+### `usuarios`
+
+> ```json
+> {
+>   "_id": "ObjectId() -> gerado pelo MondoDB",
+>   "nome": "",
+>   "email": "", //index unico
+>   "senha": "senha cryptografada bcriptyjs"
+> },
+> ...
+> ```
+
+### `imoveis`
+
+> ```json
+> {
+>   "_id": "ObjectId() -> gerado pelo MondoDB",
+>   "usuarioId": "", //index
+>   "nome": "",
+>   "endereco": ""
+> },
+> ...
+> ```
+
+### `reservas`
+
+> ```json
+> {
+>   "_id": "ObjectId() -> criado pelo MDB",
+>   "usuarioId": "", //index
+>   "imovelId": "", //index
+>   "data": "",
+>   "nome": "",
+>   "contato": "",
+>   "entrada": "",
+>   "sinal": "",
+>   "valor": ""
+> },
+> ...
+> ```
 
 ---
 
