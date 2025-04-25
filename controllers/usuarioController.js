@@ -19,7 +19,7 @@ export async function cadastrarUsuario(req, res) {
       return res.status(400).json({ erro: 'E-mail já cadastrado.' });
     }
     const senhaCriptografada = await bcryptjs.hash(senha, 10);
-    await criarUsuario({ nome, email, senha: senhaCriptografada, imoveis: [] });
+    await criarUsuario({ nome, email, senha: senhaCriptografada });
     return res.status(201).json({ mensagem: 'Usuário cadastrado com sucesso.' });
   } catch (erro) {
     console.error(erro);
