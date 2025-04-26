@@ -10,3 +10,10 @@ export default async function connect() {
   }
   return db;
 }
+
+export async function criarIndices() {
+  const db = await connect();
+  await db.collection('usuarios').createIndex({ email: 1 }, { unique: true });
+  await db.collection('imoveis').createIndex({ usuario_id: 1 });
+  await db.collection('reservas').createIndex({ usuario_id: 1, imovel_id: 1 });
+}
