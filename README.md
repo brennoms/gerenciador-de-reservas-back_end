@@ -56,27 +56,95 @@ Esta API foi desenvolvida para gerenciar um sistema de reservas de imóveis, ofe
 
 ### ✅ Status
 
-- `GET /api` → Verifica se a API está online.
+- `GET /api`
+  ```javascript
+  // Verifica se a API está online.
+  ```
 
 ### 👤 Usuários
 
-- `POST /api/usuarios/cadastro` → Cadastro de novo usuário.
-- `POST /api/usuarios/login` → Autenticação via JWT.
-- `GET /api/usuarios/me` → Dados do usuário logado.
-- `DELETE /api/usuarios/me` → Remover conta.
+- `POST /api/usuarios/cadastro`
+
+  ```javascript
+  // Cadastro de novo usuário.
+  req.body === { nome, email, senha };
+  ```
+
+- `POST /api/usuarios/login`
+
+  ```javascript
+  // Autenticação via JWT.
+  res.body === { token };
+  ```
+
+- `GET /api/usuarios/me`
+
+  ```javascript
+  // Dados do usuário logado.
+  ```
+
+- `DELETE /api/usuarios/me`
+  ```javascript
+  // Remover conta.
+  ```
 
 ### 🏠 Imóveis
 
-- `GET /api/imoveis` → Lista de imóveis do usuário.
-- `POST /api/imoveis` → Cadastro de imóvel.
-- `GET /api/imoveis/:imovel_id` → Detalhes do imóvel.
-- `DELETE /api/imoveis/:imovel_id` → Remoção de imóvel.
+- `GET /api/imoveis`
+
+  ```javascript
+  // Lista de imóveis do usuário.
+  ```
+
+- `POST /api/imoveis`
+
+  ```javascript
+  // Cadastro de imóvel.
+  req.body === { nome, endereco };
+  ```
+
+- `GET /api/imoveis/:imovel_id`
+
+  ```javascript
+  // Detalhes do imóvel.
+  ```
+
+- `DELETE /api/imoveis/:imovel_id`
+  ```javascript
+  // Remoção de imóvel.
+  ```
 
 ### 📅 Reservas
 
-- `GET /api/reservas` → Reservas do usuário.
-- `POST /api/imoveis/:imovel_id/reservas` → Criar reservas.
-- `DELETE /api/imoveis/:imovel_id/reservas` → Remover reservas.
+- `GET /api/reservas`
+
+  ```javascript
+  // Reservas do usuário.
+  ```
+
+- `GET /api/reservas/:reserva_id`
+
+  ```javascript
+  // Detalhes de uma reserva.
+  ```
+
+- `GET /api/imoveis/:imovel_id/reservas`
+
+  ```javascript
+  // Reservas de um imóvel do usuário.
+  ```
+
+- `POST /api/imoveis/:imovel_id/reservas`
+
+  ```javascript
+  // Criar reserva.
+  req.body === { data_inicio, data_fim, nome, contato };
+  ```
+
+- `DELETE /api/imoveis/:imovel_id/reservas`
+  ```javascript
+  // Remover reserva.
+  ```
 
 ---
 
@@ -113,7 +181,8 @@ Esta API foi desenvolvida para gerenciar um sistema de reservas de imóveis, ofe
 >   "_id": "ObjectId() -> criado pelo MDB",
 >   "usuarioId": "", //index
 >   "imovelId": "", //index
->   "data": "",
+>   "data_inicio": "",
+>   "data_fim": "",
 >   "nome": "",
 >   "contato": "",
 >   "entrada": "",
