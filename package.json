@@ -6,9 +6,9 @@
   "scripts": {
     "prepare": "husky install",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
-    "eslint": "eslint .",
-    "eslint:fix": "eslint . --fix",
-    "format": "prettier --write .",
+    "eslint": "eslint --config .configs/.eslintrc.json --ignore-path .configs/.eslintignore .",
+    "eslint:fix": "eslint --config .configs/.eslintrc.json --ignore-path .configs/.eslintignore . --fix",
+    "format": "prettier --config .configs/.prettierrc --ignore-path .configs/.prettierignore --write .",
     "dev": "node server.js",
     "start": "node server.js"
   },
@@ -36,8 +36,8 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json}": [
-      "eslint .",
-      "prettier --check"
+      "eslint --config .configs/.eslintrc.json --ignore-path .configs/.eslintignore .",
+      "prettier --config .configs/.prettierrc --ignore-path .configs/.prettierignore --check"
     ]
   },
   "jest": {
