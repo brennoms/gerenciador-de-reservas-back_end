@@ -9,7 +9,7 @@
     "eslint": "eslint --config .configs/.eslintrc.json --ignore-path .configs/.eslintignore .",
     "eslint:fix": "eslint --config .configs/.eslintrc.json --ignore-path .configs/.eslintignore . --fix",
     "format": "prettier --config .configs/.prettierrc --ignore-path .configs/.prettierignore --write .",
-    "dev": "node server.js",
+    "dev": "node server-dev.js",
     "start": "node server.js"
   },
   "keywords": [],
