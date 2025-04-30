@@ -9,16 +9,21 @@ import {
 } from '../models/usuarioModel.js';
 
 export async function cadastrarUsuario(req, res) {
-  const { nome, email, senha } = req.body;
+  const { nome, senha } = req.body;
+  const email = req.body.email?.toLowerCase();
   if (!nome || !email || !senha) {
     return res.status(400).json({ erro: 'Todos os campos são obrigatórios.' });
+  }
+  const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!regexEmail.test(email)) {
+    return res.status(400).json({ erro: 'E-mail inválido.' });
   }
   try {
     const existente = await encontrarPorEmail(email);
     if (existente) {
       return res.status(400).json({ erro: 'E-mail já cadastrado.' });
     }
-    const senhaCriptografada = await bcryptjs.hash(senha, 10);
+    const senhaCriptografada = await bcryptjs.hash(senha, 12);
     await criarUsuario({ nome, email, senha: senhaCriptografada });
     return res.status(201).json({ mensagem: 'Usuário cadastrado com sucesso.' });
   } catch (erro) {

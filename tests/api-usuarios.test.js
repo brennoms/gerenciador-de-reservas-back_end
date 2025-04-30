@@ -7,23 +7,36 @@ describe('Testes de POST /api/usuarios/cadastro', () => {
   it('cadastro correto. status deve ser 201', async () => {
     const res = await request(app).post('/api/usuarios/cadastro').send({
       nome: 'nome_provisório',
-      email: 'email@provisório',
+      email: 'email@provisorio.com',
       senha: 'senha_provisória',
     });
     expect(res.statusCode).toBe(201);
+    expect(res.body.mensagem).toBe('Usuário cadastrado com sucesso.');
   });
 
   it('cadastro com dados faltando. status deve ser 400.', async () => {
     const res = await request(app).post('/api/usuarios/cadastro').send({});
+    expect(res.body.erro).toBe('Todos os campos são obrigatórios.');
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('cadastro com email invalido. status deve ser 400.', async () => {
+    const res = await request(app).post('/api/usuarios/cadastro').send({
+      nome: 'nome_provisório',
+      email: 'emailprovisório',
+      senha: 'senha_provisória',
+    });
+    expect(res.body.erro).toBe('E-mail inválido.');
     expect(res.statusCode).toBe(400);
   });
 
   it('cadastro com email repetido. status deve ser 400.', async () => {
     const res = await request(app).post('/api/usuarios/cadastro').send({
       nome: 'nome_provisório',
-      email: 'email@provisório',
+      email: 'email@provisorio.com',
       senha: 'senha_provisória',
     });
+    expect(res.body.erro).toBe('E-mail já cadastrado.');
     expect(res.statusCode).toBe(400);
   });
 });
@@ -31,7 +44,7 @@ describe('Testes de POST /api/usuarios/cadastro', () => {
 describe('Testes de POST /api/usuarios/login', () => {
   it('login correto. status deve ser 200.', async () => {
     const res = await request(app).post('/api/usuarios/login').send({
-      email: 'email@provisório',
+      email: 'email@provisorio.com',
       senha: 'senha_provisória',
     });
     expect(res.statusCode).toBe(200);
@@ -49,7 +62,7 @@ describe('Testes de POST /api/usuarios/login', () => {
 
   it('login com senha errada. status deve ser 401.', async () => {
     const res = await request(app).post('/api/usuarios/login').send({
-      email: 'email@provisório',
+      email: 'email@provisorio.com',
       senha: 'senha_provisória_errada',
     });
     expect(res.statusCode).toBe(401);
