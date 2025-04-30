@@ -33,7 +33,8 @@ export async function cadastrarUsuario(req, res) {
 }
 
 export async function loginUsuario(req, res) {
-  const { email, senha } = req.body;
+  const { senha } = req.body;
+  const email = req.body.email?.toLowerCase();
   try {
     const usuario = await encontrarPorEmail(email);
     if (!usuario) {
