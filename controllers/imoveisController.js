@@ -2,16 +2,19 @@ import { buscarImoveis, buscarImovel, criarImovel, excluirImovel } from '../mode
 
 export async function adicionarImovel(req, res) {
   const { usuario_id } = req.usuario;
-  const { nome, imagem, endereco } = req.body;
-  if (!nome || !imagem || !endereco) {
-    return res.status(400).json({ erro: 'Nome, imagem e endereço são obrigatórios' });
+  const { nome, endereco } = req.body;
+  if (!nome || !endereco) {
+    return res.status(400).json({ erro: 'Nome e endereço são obrigatórios' });
+  }
+  if (!req.file) {
+    return res.status(400).json({ error: 'Imagem não enviada corretamente' });
   }
   const imovel = {
     nome: nome,
-    imagem: imagem,
     endereco: endereco,
   };
   try {
+    imovel.imagem_url = req.file.path;
     const resultado = await criarImovel(usuario_id, imovel);
     return res.status(200).json({ imovel_id: resultado.insertedId });
   } catch (erro) {
