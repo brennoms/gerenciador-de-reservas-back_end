@@ -26,6 +26,8 @@ Esta API foi desenvolvida para gerenciar um sistema de reservas de imóveis, ofe
 
 - **Node.js + Express**
 - **MongoDB Atlas**
+- **Cloudinary**
+- **multer** para upload de arquivos
 - **Autenticação JWT + bcryptjs**
 - **Jest + Supertest** para testes automatizados ✅
 - **CI/CD** (implementação em progresso) 🔄
@@ -46,6 +48,10 @@ Esta API foi desenvolvida para gerenciar um sistema de reservas de imóveis, ofe
    MONGO_URI=<sua-string-de-conexão>
    DB_NOME=<nome-do-banco>
    JWT_SECRET=<chave-secreta>
+
+   CLOUDINARY_CLOUD_NAME=<seu-cloud-name>
+   CLOUDINARY_API_KEY=<sua-api-key>
+   CLOUDINARY_API_SECRET=<seu-api-secret>
    ```
 4. Inicie o servidor:
    ```bash
