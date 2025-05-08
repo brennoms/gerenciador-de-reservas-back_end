@@ -1,4 +1,4 @@
-//Refazer depois
+import { buscarReservas } from '../models/reservaModel.js';
 
 const nome_mes = [
   'janeiro',
@@ -16,12 +16,18 @@ const nome_mes = [
 ];
 
 export default async function handler(req, res) {
-  if (req.method !== 'GET') return res.status(405).end();
-
-  const token_invert_texto = process.env.TOKEN_INVERT_TEXTO;
+  const { usuario_id, imovel_id } = req.params;
   let { ano, estado } = req.query;
+  const token_invert_texto = process.env.TOKEN_INVERT_TEXTO;
 
-  if (ano === undefined) {
+  if (!ano) {
+    return res.status(400).json({ erro: 'Ano não foi fornecido!' });
+  }
+  if (ano < 2000 || ano > 3000) {
+    return res.status(400).json({ erro: 'Ano invalido!' });
+  }
+
+  if (!ano) {
     ano = new Date().getFullYear();
   }
 
@@ -47,12 +53,12 @@ export default async function handler(req, res) {
   let reservas = {};
   try {
     //busca as reservas no banco de dados
-    console.log('em desenvolvimento');
+    reservas = await buscarReservas(usuario_id, imovel_id);
   } catch (erro) {
     return res.status(500).json({ erro: 'Erro interno no banco de dados' });
   }
 
-  let lista_mes = [];
+  let lista_ano = [];
   for (let mes = 0; mes <= 11; mes++) {
     let ultimo_dia_mes;
     let primeiro_dia_da_semana = new Date(ano, mes, 1).getDay();
@@ -65,6 +71,7 @@ export default async function handler(req, res) {
     for (let dia = 1; dia <= primeiro_dia_da_semana; dia++) {
       const date = {
         date: new Date(ano, mes, dia - primeiro_dia_da_semana).toISOString().split('T')[0],
+        dia,
       };
       for (const feriado of feriados) {
         if (feriado['date'] === date['date']) date['feriado'] = feriado;
@@ -75,7 +82,7 @@ export default async function handler(req, res) {
     }
 
     for (let dia = 1; dia <= ultimo_dia_mes; dia++) {
-      const date = { date: new Date(ano, mes, dia).toISOString().split('T')[0] };
+      const date = { date: new Date(ano, mes, dia).toISOString().split('T')[0], dia };
       for (const feriado of feriados) {
         if (feriado['date'] === date['date']) date['feriado'] = feriado;
       }
@@ -88,14 +95,14 @@ export default async function handler(req, res) {
     const dias_faltando = Math.ceil(lista_dias.length / 7) * 7 - lista_dias.length;
     if (dias_faltando !== 0)
       for (let dia = 0; dia < dias_faltando; dia++) {
-        const date = { date: new Date(ano, mes + 1, dia + 1).toISOString().split('T')[0] };
+        const date = { date: new Date(ano, mes + 1, dia + 1).toISOString().split('T')[0], dia };
         for (const feriado of feriados) {
           if (feriado['date'] === date['date']) date['feriado'] = feriado;
         }
         lista_dias.push(date);
       }
 
-    lista_mes.push({ ano: ano, mes_nome: nome_mes[mes], mes_numero: mes, dias: lista_dias });
+    lista_ano.push({ ano: ano, mes_nome: nome_mes[mes], mes_numero: mes, dias: lista_dias });
   }
-  res.json(lista_mes);
+  res.status(200).json(lista_ano);
 }
