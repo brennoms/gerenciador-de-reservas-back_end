@@ -16,7 +16,8 @@ const nome_mes = [
 ];
 
 export default async function handler(req, res) {
-  const { usuario_id, imovel_id } = req.params;
+  const { imovel_id } = req.params;
+  const { usuario_id } = req.usuario;
   let { ano, estado } = req.query;
   const token_invert_texto = process.env.TOKEN_INVERT_TEXTO;
 
@@ -50,11 +51,11 @@ export default async function handler(req, res) {
     return res.status(500).json({ erro: 'Erro interno no servidor' });
   }
 
-  let reservas = {};
+  let reservasFiltradas = [];
   try {
     //busca as reservas no banco de dados
-    reservas = await buscarReservas(usuario_id, imovel_id);
-    const reservasFiltradas = [];
+    const reservas = await buscarReservas(usuario_id, imovel_id);
+    reservasFiltradas = [];
     for (const reserva of reservas) {
       reservasFiltradas.push({ data_inicio: reserva.data_inicio, data_fim: reserva.data_fim });
     }
@@ -82,6 +83,12 @@ export default async function handler(req, res) {
           date['feriado'] = feriado;
         }
       }
+      for (const reserva of reservasFiltradas) {
+        if (date.date >= reserva.data_inicio && date.date <= reserva.data_fim) {
+          date['reserva'] = reserva;
+          break;
+        }
+      }
       if (new Date(ano, mes, dia).toISOString().split('T')[0] === dia_atual)
         date['dia atual'] = true;
       lista_dias.push(date);
@@ -94,7 +101,13 @@ export default async function handler(req, res) {
           date['feriado'] = feriado;
         }
       }
-      // inserir reservas
+      for (const reserva of reservasFiltradas) {
+        if (date.date >= reserva.data_inicio && date.date <= reserva.data_fim) {
+          date['reserva'] = reserva;
+          break;
+        }
+      }
+
       if (new Date(ano, mes, dia).toISOString().split('T')[0] === dia_atual)
         date['dia_atual'] = true;
       lista_dias.push(date);
@@ -108,6 +121,12 @@ export default async function handler(req, res) {
         for (const feriado of feriados) {
           if (feriado['date'] === date['date']) {
             date['feriado'] = feriado;
+          }
+        }
+        for (const reserva of reservasFiltradas) {
+          if (date.date >= reserva.data_inicio && date.date <= reserva.data_fim) {
+            date['reserva'] = reserva;
+            break;
           }
         }
         lista_dias.push(date);

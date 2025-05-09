@@ -16,9 +16,14 @@ const nome_mes = [
 ];
 
 export default async function handler(req, res) {
-  const { usuario_id, imovel_id } = req.params;
+  const { imovel_id } = req.params;
+  const { usuario_id } = req.usuario;
   let { ano, estado } = req.query;
   const token_invert_texto = process.env.TOKEN_INVERT_TEXTO;
+
+  if ((!usuario_id, !imovel_id)) {
+    return res.status(400).json({ erro: 'id do usuario e do imovel são obrigatorios' });
+  }
 
   if (!ano) {
     return res.status(400).json({ erro: 'Ano não foi fornecido!' });
@@ -50,7 +55,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ erro: 'Erro interno no servidor' });
   }
 
-  let reservas = {};
+  let reservas = [];
   try {
     //busca as reservas no banco de dados
     reservas = await buscarReservas(usuario_id, imovel_id);
@@ -72,10 +77,16 @@ export default async function handler(req, res) {
       const date = {
         date: new Date(ano, mes, dia - primeiro_dia_da_semana).toISOString().split('T')[0],
       };
-      date.dia = date.date.split('-')[2];
+      date.dia = parseInt(date.date.split('-')[2]);
       for (const feriado of feriados) {
         if (feriado['date'] === date['date']) {
           date['feriado'] = feriado;
+        }
+      }
+      for (const reserva of reservas) {
+        if (date.date >= reserva.data_inicio && date.date <= reserva.data_fim) {
+          date['reserva'] = reserva;
+          break;
         }
       }
       if (new Date(ano, mes, dia).toISOString().split('T')[0] === dia_atual)
@@ -90,7 +101,12 @@ export default async function handler(req, res) {
           date['feriado'] = feriado;
         }
       }
-      // inserir reservas
+      for (const reserva of reservas) {
+        if (date.date >= reserva.data_inicio && date.date <= reserva.data_fim) {
+          date['reserva'] = reserva;
+          break;
+        }
+      }
       if (new Date(ano, mes, dia).toISOString().split('T')[0] === dia_atual)
         date['dia_atual'] = true;
       lista_dias.push(date);
@@ -100,10 +116,16 @@ export default async function handler(req, res) {
     if (dias_faltando !== 0)
       for (let dia = 0; dia < dias_faltando; dia++) {
         const date = { date: new Date(ano, mes + 1, dia + 1).toISOString().split('T')[0] };
-        date.dia = date.date.split('-')[2];
+        date.dia = parseInt(date.date.split('-')[2]);
         for (const feriado of feriados) {
           if (feriado['date'] === date['date']) {
             date['feriado'] = feriado;
+          }
+        }
+        for (const reserva of reservas) {
+          if (date.date >= reserva.data_inicio && date.date <= reserva.data_fim) {
+            date['reserva'] = reserva;
+            break;
           }
         }
         lista_dias.push(date);
