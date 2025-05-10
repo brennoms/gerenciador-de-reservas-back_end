@@ -20,6 +20,8 @@ export async function criarReserva(usuario_id, imovel_id, novaReserva) {
     imovel_id: new ObjectId(imovel_id),
     nome: novaReserva.nome,
     contato: novaReserva.contato,
+    sinal: novaReserva.sinal,
+    valor: novaReserva.valor,
     data_inicio: dataInicio,
     data_fim: dataFim,
   };
@@ -53,7 +55,10 @@ export async function buscarReservas(usuario_id, imovel_id) {
     resultado =
       db
         .collection('reservas')
-        .find({ usuario_id: new ObjectId(usuario_id), imovel_id: new ObjectId(imovel_id) })
+        .find({
+          usuario_id: new ObjectId(usuario_id),
+          imovel_id: new ObjectId(imovel_id),
+        })
         .toArray() || [];
   }
 
