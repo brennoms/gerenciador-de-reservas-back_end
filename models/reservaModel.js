@@ -80,9 +80,6 @@ export async function buscarReservasPorPeriodo(usuario_id, imovel_id, data_inici
   const dataInicioUTC = new Date(Date.UTC(anoInicio, mesInicio - 1, diaInicio, 0, 0, 0));
   const dataFimUTC = new Date(Date.UTC(anoFim, mesFim - 1, diaFim, 23, 59, 59, 999)); // Fim do dia
 
-  console.log('Data de Início (UTC):', dataInicioUTC);
-  console.log('Data de Fim (UTC):', dataFimUTC);
-
   if (isNaN(dataInicioUTC) || isNaN(dataFimUTC)) {
     return { sucesso: false, mensagem: 'Data inválida.' };
   }
@@ -96,8 +93,6 @@ export async function buscarReservasPorPeriodo(usuario_id, imovel_id, data_inici
       data_fim: { $gte: dataInicioUTC },
     })
     .toArray();
-
-  console.log('Resultado da busca:', reservas);
 
   return reservas || [];
 }
