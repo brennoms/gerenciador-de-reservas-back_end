@@ -3,6 +3,7 @@ import {
   buscarReservas,
   excluirReserva,
   buscarReserva,
+  buscarReservaPorPeriodo,
 } from '../models/reservaModel.js';
 import { buscarImovel } from '../models/imoveisModel.js';
 
@@ -27,6 +28,16 @@ export async function fazerReserva(req, res) {
   try {
     if (!(await buscarImovel(usuario_id, imovel_id))) {
       return res.status(404).json({ erro: 'Imóvel não encontrado' });
+    }
+    if (
+      !(await buscarReservaPorPeriodo(
+        usuario_id,
+        imovel_id,
+        novaReserva.data_inicio,
+        novaReserva.data_fim
+      ))
+    ) {
+      return res.status(404).json({ erro: 'já existem reservas nesse periodo' });
     }
     const reserva = await criarReserva(usuario_id, imovel_id, novaReserva);
     return res.status(200).json({ reserva_id: reserva.insertedId });
