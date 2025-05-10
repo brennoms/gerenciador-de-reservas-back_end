@@ -18,11 +18,13 @@ export async function fazerReserva(req, res) {
       return res.status(400).json({ erro: `Campo ${chave} é obrigatório` });
     }
   }
-  if (novaReserva.data_inicio >= novaReserva.data_fim) {
-    return res.status(400).json({ erro: 'Data de início deve ser anterior à data de fim' });
-  }
-  if (novaReserva.data_inicio < new Date().toISOString().split('T')[0]) {
-    return res.status(400).json({ erro: 'Data de início deve ser futura' });
+  if (!(novaReserva.data_inicio === novaReserva.data_fim)) {
+    if (novaReserva.data_inicio >= novaReserva.data_fim) {
+      return res.status(400).json({ erro: 'Data de início deve ser anterior à data de fim' });
+    }
+    if (novaReserva.data_inicio < new Date().toISOString().split('T')[0]) {
+      return res.status(400).json({ erro: 'Data de início deve ser futura' });
+    }
   }
 
   try {
