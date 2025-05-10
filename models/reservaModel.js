@@ -5,8 +5,11 @@ import connect from './database.js';
 export async function criarReserva(usuario_id, imovel_id, novaReserva) {
   const db = await connect();
 
-  const dataInicio = new Date(novaReserva.data_inicio);
-  const dataFim = new Date(novaReserva.data_fim);
+  const [anoInicio, mesInicio, diaInicio] = novaReserva.data_inicio.split('-').map(Number);
+  const [anoFim, mesFim, diaFim] = novaReserva.data_fim.split('-').map(Number);
+
+  const dataInicio = new Date(Date.UTC(anoInicio, mesInicio - 1, diaInicio));
+  const dataFim = new Date(Date.UTC(anoFim, mesFim - 1, diaFim));
 
   if (isNaN(dataInicio) || isNaN(dataFim)) {
     return false;
@@ -17,8 +20,8 @@ export async function criarReserva(usuario_id, imovel_id, novaReserva) {
     imovel_id: new ObjectId(imovel_id),
     nome: novaReserva.nome,
     contato: novaReserva.contato,
-    data_inicio: new Date(dataInicio),
-    data_fim: new Date(dataFim),
+    data_inicio: dataInicio,
+    data_fim: dataFim,
   };
 
   const resultado = db.collection('reservas').insertOne(reserva);
@@ -68,20 +71,33 @@ export async function buscarReserva(usuario_id, reserva_id) {
   return resultado;
 }
 
-export async function buscarReservaPorPeriodo(usuario_id, imovel_id, data_inicio, data_fim) {
+export async function buscarReservasPorPeriodo(usuario_id, imovel_id, data_inicio, data_fim) {
   const db = await connect();
-  const reservas = db.collection('reservas');
 
-  const resultado = await reservas
+  const [anoInicio, mesInicio, diaInicio] = data_inicio.split('-').map(Number);
+  const [anoFim, mesFim, diaFim] = data_fim.split('-').map(Number);
+
+  const dataInicioUTC = new Date(Date.UTC(anoInicio, mesInicio - 1, diaInicio, 0, 0, 0));
+  const dataFimUTC = new Date(Date.UTC(anoFim, mesFim - 1, diaFim, 23, 59, 59, 999)); // Fim do dia
+
+  console.log('Data de Início (UTC):', dataInicioUTC);
+  console.log('Data de Fim (UTC):', dataFimUTC);
+
+  if (isNaN(dataInicioUTC) || isNaN(dataFimUTC)) {
+    return { sucesso: false, mensagem: 'Data inválida.' };
+  }
+
+  const reservas = await db
+    .collection('reservas')
     .find({
-      usuario_id,
-      imovel_id,
-      data: {
-        $gte: new Date(data_inicio),
-        $lte: new Date(data_fim),
-      },
+      usuario_id: new ObjectId(usuario_id),
+      imovel_id: new ObjectId(imovel_id),
+      data_inicio: { $lte: dataFimUTC },
+      data_fim: { $gte: dataInicioUTC },
     })
     .toArray();
 
-  return resultado;
+  console.log('Resultado da busca:', reservas);
+
+  return reservas || [];
 }
