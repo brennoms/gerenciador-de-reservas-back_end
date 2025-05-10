@@ -84,7 +84,10 @@ export default async function handler(req, res) {
         }
       }
       for (const reserva of reservas) {
-        if (date.date >= reserva.data_inicio && date.date <= reserva.data_fim) {
+        if (
+          date.date >= reserva.data_inicio.toISOString().split('T')[0] &&
+          date.date <= reserva.data_fim.toISOString().split('T')[0]
+        ) {
           date['reserva'] = reserva;
           break;
         }
@@ -102,7 +105,10 @@ export default async function handler(req, res) {
         }
       }
       for (const reserva of reservas) {
-        if (date.date >= reserva.data_inicio && date.date <= reserva.data_fim) {
+        if (
+          date.date >= reserva.data_inicio.toISOString().split('T')[0] &&
+          date.date <= reserva.data_fim.toISOString().split('T')[0]
+        ) {
           date['reserva'] = reserva;
           break;
         }
@@ -123,7 +129,10 @@ export default async function handler(req, res) {
           }
         }
         for (const reserva of reservas) {
-          if (date.date >= reserva.data_inicio && date.date <= reserva.data_fim) {
+          if (
+            date.date >= reserva.data_inicio.toISOString().split('T')[0] &&
+            date.date <= reserva.data_fim.toISOString().split('T')[0]
+          ) {
             date['reserva'] = reserva;
             break;
           }
