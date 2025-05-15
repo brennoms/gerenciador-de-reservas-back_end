@@ -44,6 +44,7 @@ Esta API foi desenvolvida para gerenciar um sistema de reservas de imóveis, ofe
    npm install
    ```
 3. Configure variáveis de ambiente (`.env`):
+
    ```
    MONGO_URI=<sua-string-de-conexão>
    DB_NOME=<nome-do-banco>
@@ -53,6 +54,7 @@ Esta API foi desenvolvida para gerenciar um sistema de reservas de imóveis, ofe
    CLOUDINARY_API_KEY=<sua-api-key>
    CLOUDINARY_API_SECRET=<seu-api-secret>
    ```
+
 4. Inicie o servidor:
    ```bash
    npm run start
@@ -147,7 +149,7 @@ Esta API foi desenvolvida para gerenciar um sistema de reservas de imóveis, ofe
   req.body === { data_inicio, data_fim, nome, contato };
   ```
 
-- `DELETE /api/imoveis/:imovel_id/reservas`
+- `DELETE /imoveis/:imovel_id/reservas/:reserva_id`
   ```javascript
   // Remover reserva.
   ```
