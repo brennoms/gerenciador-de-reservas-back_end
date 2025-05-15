@@ -1,217 +1,165 @@
-# Gerenciador de Reservas - API 🏡
+# Documentação do Gerenciador de Reservas API
 
-## 📄 Descrição
+## Visão Geral
 
-Esta API foi desenvolvida para gerenciar um sistema de reservas de imóveis, oferecendo funcionalidades como:
+O Gerenciador de Reservas é uma API RESTful desenvolvida para gerenciar usuários, imóveis e reservas. A API utiliza MongoDB como banco de dados e JWT para autenticação.
 
-- Controle de usuários e autenticação JWT 🔑
-- Cadastro e gerenciamento de imóveis 🏠
-- Criação e gerenciamento de reservas 📅
-- Banco de dados estruturado no **MongoDB Atlas** 💾
+## Tecnologias Utilizadas
 
-## 📂 Estrutura do Projeto
+- Node.js
+- Express.js
+- MongoDB
+- JWT (JSON Web Tokens)
+- bcryptjs (para criptografia de senhas)
+- Jest e Supertest (para testes automatizados)
+
+## Endpoints da API
+
+### Autenticação e Usuários
+
+| Método | Endpoint                 | Descrição                     | Corpo da Requisição      | Resposta                                      |
+| ------ | ------------------------ | ----------------------------- | ------------------------ | --------------------------------------------- |
+| POST   | `/api/usuarios/cadastro` | Cadastra um novo usuário      | `{ nome, email, senha }` | `{ _id, nome, email }`                        |
+| POST   | `/api/usuarios/login`    | Autentica um usuário          | `{ email, senha }`       | `{ token }`                                   |
+| GET    | `/api/usuarios/me`       | Obtém dados do usuário logado | -                        | `{ _id, nome, email }`                        |
+| DELETE | `/api/usuarios/me`       | Remove a conta do usuário     | -                        | `{ message: "Usuário removido com sucesso" }` |
+
+### Imóveis
+
+| Método | Endpoint                  | Descrição                              | Corpo da Requisição  | Resposta                                     |
+| ------ | ------------------------- | -------------------------------------- | -------------------- | -------------------------------------------- |
+| GET    | `/api/imoveis`            | Lista todos os imóveis do usuário      | -                    | Array de imóveis                             |
+| POST   | `/api/imoveis`            | Cadastra um novo imóvel                | `{ nome, endereco }` | Imóvel criado                                |
+| GET    | `/api/imoveis/:imovel_id` | Obtém detalhes de um imóvel específico | -                    | Detalhes do imóvel                           |
+| DELETE | `/api/imoveis/:imovel_id` | Remove um imóvel                       | -                    | `{ message: "Imóvel removido com sucesso" }` |
+
+### Reservas
+
+| Método | Endpoint                                       | Descrição                                | Corpo da Requisição                                                  | Resposta                                      |
+| ------ | ---------------------------------------------- | ---------------------------------------- | -------------------------------------------------------------------- | --------------------------------------------- |
+| GET    | `/api/reservas`                                | Lista todas as reservas do usuário       | -                                                                    | Array de reservas                             |
+| GET    | `/api/reservas/:reserva_id`                    | Obtém detalhes de uma reserva específica | -                                                                    | Detalhes da reserva                           |
+| GET    | `/api/imoveis/:imovel_id/reservas`             | Lista reservas de um imóvel específico   | -                                                                    | Array de reservas                             |
+| POST   | `/api/imoveis/:imovel_id/reservas`             | Cria uma nova reserva                    | `{ data_inicio, data_fim, nome, contato, entrada?, sinal?, valor? }` | Reserva criada                                |
+| DELETE | `/api/imoveis/:imovel_id/reservas/:reserva_id` | Remove uma reserva                       | -                                                                    | `{ message: "Reserva removida com sucesso" }` |
+
+## Modelos de Dados
+
+### Usuário
+
+```json
+{
+  "_id": "ObjectId()",
+  "nome": "String",
+  "email": "String (único)",
+  "senha": "String (criptografada)"
+}
+```
+
+### Imóvel
+
+```json
+{
+  "_id": "ObjectId()",
+  "usuarioId": "ObjectId()",
+  "nome": "String",
+  "endereco": "String"
+}
+```
+
+### Reserva
+
+```json
+{
+  "_id": "ObjectId()",
+  "usuarioId": "ObjectId()",
+  "imovelId": "ObjectId()",
+  "data_inicio": "Date",
+  "data_fim": "Date",
+  "nome": "String",
+  "contato": "String",
+  "entrada": "Number (opcional)",
+  "sinal": "Number (opcional)",
+  "valor": "Number (opcional)"
+}
+```
+
+## Autenticação
+
+A API utiliza autenticação baseada em JWT (JSON Web Tokens). Para acessar endpoints protegidos, é necessário incluir o token no cabeçalho da requisição:
 
 ```
-📦 gerenciador-de-reservas-back_end
-├── controllers/        # Lógica principal das rotas
-├── middlewares/        # Autenticação, tokens e segurança
-├── models/            # Integração com o banco de dados
-├── routes/            # Definição das rotas da API
-├── tests/             # Testes automatizados com Jest
-├── utils/             # Funções utilitárias
-└── README.md          # Documentação
+Authorization: Bearer <token>
 ```
 
-## 🚀 Tecnologias Utilizadas
+O token é obtido através do endpoint de login e tem validade limitada.
 
-- **Node.js + Express**
-- **MongoDB Atlas**
-- **Cloudinary**
-- **multer** para upload de arquivos
-- **Autenticação JWT + bcryptjs**
-- **Jest + Supertest** para testes automatizados ✅
-- **CI/CD** (implementação em progresso) 🔄
+## Tratamento de Erros
 
-## 🛠️ Configuração
+A API retorna os seguintes códigos de status HTTP:
 
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/brennoms/gerenciador-de-reservas-back_end.git
-   cd gerenciador-de-reservas-back_end
-   ```
-2. Instale as dependências:
-   ```bash
-   npm install
-   ```
-3. Configure variáveis de ambiente (`.env`):
+- `200 OK`: Requisição bem-sucedida
+- `201 Created`: Recurso criado com sucesso
+- `400 Bad Request`: Dados inválidos ou faltando
+- `401 Unauthorized`: Autenticação necessária ou inválida
+- `403 Forbidden`: Sem permissão para acessar o recurso
+- `404 Not Found`: Recurso não encontrado
+- `500 Internal Server Error`: Erro interno do servidor
 
-   ```
-   MONGO_URI=<sua-string-de-conexão>
-   DB_NOME=<nome-do-banco>
-   JWT_SECRET=<chave-secreta>
+## Executando o Projeto
 
-   CLOUDINARY_CLOUD_NAME=<seu-cloud-name>
-   CLOUDINARY_API_KEY=<sua-api-key>
-   CLOUDINARY_API_SECRET=<seu-api-secret>
-   ```
+### Requisitos
 
-4. Inicie o servidor:
-   ```bash
-   npm run start
-   ```
+- Node.js
+- MongoDB
 
-## 🔎 Rotas da API
+### Instalação
 
-### ✅ Status
+```bash
+npm install
+```
 
-- `GET /api`
-  ```javascript
-  // Verifica se a API está online.
-  ```
+### Configuração
 
-### 👤 Usuários
+Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
 
-- `POST /api/usuarios/cadastro`
+```
+MONGO_URI=sua_uri_do_mongodb
+DB_NOME=nome_do_seu_banco_de_dados
+JWT_SECRET=seu_segredo_jwt
+CLOUDINARY_CLOUD_NAME=seu_cloudinary_cloud_name
+CLOUDINARY_API_KEY=sua_cloudinary_api_key
+CLOUDINARY_API_SECRET=seu_cloudinary_api_secret
+TOKEN_INVERT_TEXTO=seu_token_invert_texto (para retornar os feriados)
+```
 
-  ```javascript
-  // Cadastro de novo usuário.
-  req.body === { nome, email, senha };
-  ```
+### Iniciar o Servidor
 
-- `POST /api/usuarios/login`
+```bash
+npm start
+```
 
-  ```javascript
-  // Autenticação via JWT.
-  res.body === { token };
-  ```
-
-- `GET /api/usuarios/me`
-
-  ```javascript
-  // Dados do usuário logado.
-  ```
-
-- `DELETE /api/usuarios/me`
-  ```javascript
-  // Remover conta.
-  ```
-
-### 🏠 Imóveis
-
-- `GET /api/imoveis`
-
-  ```javascript
-  // Lista de imóveis do usuário.
-  ```
-
-- `POST /api/imoveis`
-
-  ```javascript
-  // Cadastro de imóvel.
-  req.body === { nome, endereco };
-  ```
-
-- `GET /api/imoveis/:imovel_id`
-
-  ```javascript
-  // Detalhes do imóvel.
-  ```
-
-- `DELETE /api/imoveis/:imovel_id`
-  ```javascript
-  // Remoção de imóvel.
-  ```
-
-### 📅 Reservas
-
-- `GET /api/reservas`
-
-  ```javascript
-  // Reservas do usuário.
-  ```
-
-- `GET /api/reservas/:reserva_id`
-
-  ```javascript
-  // Detalhes de uma reserva.
-  ```
-
-- `GET /api/imoveis/:imovel_id/reservas`
-
-  ```javascript
-  // Reservas de um imóvel do usuário.
-  ```
-
-- `POST /api/imoveis/:imovel_id/reservas`
-
-  ```javascript
-  // Criar reserva.
-  req.body === { data_inicio, data_fim, nome, contato };
-  ```
-
-- `DELETE /imoveis/:imovel_id/reservas/:reserva_id`
-  ```javascript
-  // Remover reserva.
-  ```
-
----
-
-## Coleções (MongoDB)
-
-### `usuarios`
-
-> ```json
-> {
->   "_id": "ObjectId() -> gerado pelo MondoDB",
->   "nome": "",
->   "email": "", //index unico
->   "senha": "senha cryptografada bcriptyjs"
-> },
-> ...
-> ```
-
-### `imoveis`
-
-> ```json
-> {
->   "_id": "ObjectId() -> gerado pelo MondoDB",
->   "usuarioId": "", //index
->   "nome": "",
->   "endereco": ""
-> },
-> ...
-> ```
-
-### `reservas`
-
-> ```json
-> {
->   "_id": "ObjectId() -> criado pelo MDB",
->   "usuarioId": "", //index
->   "imovelId": "", //index
->   "data_inicio": "",
->   "data_fim": "",
->   "nome": "",
->   "contato": "",
->   "entrada": "",
->   "sinal": "",
->   "valor": ""
-> },
-> ...
-> ```
-
----
-
-## 🧪 Testes Automatizados
-
-Seu projeto agora conta com **testes automatizados usando Jest e Supertest**, garantindo que a API funcione corretamente. Para executar os testes:
+### Executar Testes
 
 ```bash
 npm run test
 ```
 
-Execute `jest --coverage` para verificar a cobertura de código e identificar pontos de melhoria.
+Para verificar a cobertura de testes:
 
-## 📜 Licença
+```bash
+npx jest --coverage
+```
+
+## Sugestões de Melhorias Futuras
+
+1. Implementar endpoints para atualização de recursos (PUT/PATCH)
+2. Adicionar paginação para endpoints que retornam listas
+3. Implementar filtros e ordenação para consultas
+4. Adicionar validação de dados mais robusta
+5. Implementar sistema de recuperação de senha
+6. Adicionar suporte a upload de imagens para imóveis
+
+## Licença
 
 Este projeto ainda não tem uma licença definida. 🚧
