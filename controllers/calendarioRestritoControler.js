@@ -52,6 +52,7 @@ export default async function handler(req, res) {
       feriados = await resposta.json();
     }
   } catch (erro) {
+    console.log(erro);
     return res.status(500).json({ erro: 'Erro interno no servidor' });
   }
 
@@ -63,84 +64,70 @@ export default async function handler(req, res) {
     return res.status(500).json({ erro: 'Erro interno no banco de dados' });
   }
 
-  let lista_ano = [];
+  const trabalhos_assincronos = [];
+
   for (let mes = 0; mes <= 11; mes++) {
-    let ultimo_dia_mes;
-    let primeiro_dia_da_semana = new Date(ano, mes, 1).getDay();
-    const dia_atual = new Date().toISOString().split('T')[0];
-    const lista_dias = [];
+    const trabalho_assincrono = async () => {
+      let ultimo_dia_mes;
+      let primeiro_dia_da_semana = new Date(ano, mes, 1).getDay();
+      const dia_atual = new Date().toISOString().split('T')[0];
+      const lista_dias = [];
 
-    if (mes + 1 > 11) ultimo_dia_mes = new Date(ano + 1, 0, 0).getDate();
-    else ultimo_dia_mes = new Date(ano, mes + 1, 0).getDate();
+      if (mes + 1 > 11) {
+        ultimo_dia_mes = new Date(ano + 1, 0, 0).getDate();
+      } else {
+        ultimo_dia_mes = new Date(ano, mes + 1, 0).getDate();
+      }
 
-    for (let dia = 1; dia <= primeiro_dia_da_semana; dia++) {
-      const date = {
-        date: new Date(ano, mes, dia - primeiro_dia_da_semana).toISOString().split('T')[0],
+      const adicionaInfo = date => {
+        const dia = parseInt(date.split('-')[2]);
+        const item = { date, dia };
+
+        const feriado = feriados.find(f => f.date === date);
+        if (feriado) item.feriado = feriado;
+
+        const reserva = reservas.find(
+          r =>
+            date >= r.data_inicio.toISOString().split('T')[0] &&
+            date <= r.data_fim.toISOString().split('T')[0]
+        );
+        if (reserva) item.reserva = reserva;
+
+        if (date === dia_atual) item.dia_atual = true;
+
+        return item;
       };
-      date.dia = parseInt(date.date.split('-')[2]);
-      for (const feriado of feriados) {
-        if (feriado['date'] === date['date']) {
-          date['feriado'] = feriado;
-        }
-      }
-      for (const reserva of reservas) {
-        if (
-          date.date >= reserva.data_inicio.toISOString().split('T')[0] &&
-          date.date <= reserva.data_fim.toISOString().split('T')[0]
-        ) {
-          date['reserva'] = reserva;
-          break;
-        }
-      }
-      if (new Date(ano, mes, dia).toISOString().split('T')[0] === dia_atual)
-        date['dia atual'] = true;
-      lista_dias.push(date);
-    }
 
-    for (let dia = 1; dia <= ultimo_dia_mes; dia++) {
-      const date = { date: new Date(ano, mes, dia).toISOString().split('T')[0], dia };
-      for (const feriado of feriados) {
-        if (feriado['date'] === date['date']) {
-          date['feriado'] = feriado;
-        }
+      // Dias do mês anterior
+      for (let dia = 1; dia <= primeiro_dia_da_semana; dia++) {
+        const data = new Date(ano, mes, dia - primeiro_dia_da_semana).toISOString().split('T')[0];
+        lista_dias.push(adicionaInfo(data));
       }
-      for (const reserva of reservas) {
-        if (
-          date.date >= reserva.data_inicio.toISOString().split('T')[0] &&
-          date.date <= reserva.data_fim.toISOString().split('T')[0]
-        ) {
-          date['reserva'] = reserva;
-          break;
-        }
-      }
-      if (new Date(ano, mes, dia).toISOString().split('T')[0] === dia_atual)
-        date['dia_atual'] = true;
-      lista_dias.push(date);
-    }
 
-    const dias_faltando = Math.ceil(lista_dias.length / 7) * 7 - lista_dias.length;
-    if (dias_faltando !== 0)
+      // Dias do mês atual
+      for (let dia = 1; dia <= ultimo_dia_mes; dia++) {
+        const data = new Date(ano, mes, dia).toISOString().split('T')[0];
+        lista_dias.push(adicionaInfo(data));
+      }
+
+      // Dias do próximo mês para completar semana
+      const dias_faltando = Math.ceil(lista_dias.length / 7) * 7 - lista_dias.length;
       for (let dia = 0; dia < dias_faltando; dia++) {
-        const date = { date: new Date(ano, mes + 1, dia + 1).toISOString().split('T')[0] };
-        date.dia = parseInt(date.date.split('-')[2]);
-        for (const feriado of feriados) {
-          if (feriado['date'] === date['date']) {
-            date['feriado'] = feriado;
-          }
-        }
-        for (const reserva of reservas) {
-          if (
-            date.date >= reserva.data_inicio.toISOString().split('T')[0] &&
-            date.date <= reserva.data_fim.toISOString().split('T')[0]
-          ) {
-            date['reserva'] = reserva;
-            break;
-          }
-        }
-        lista_dias.push(date);
+        const data = new Date(ano, mes + 1, dia + 1).toISOString().split('T')[0];
+        lista_dias.push(adicionaInfo(data));
       }
 
-    lista_ano.push({ ano: ano, mes_nome: nome_mes[mes], mes_numero: mes, dias: lista_dias });
+      return {
+        ano,
+        mes_nome: nome_mes[mes],
+        mes_numero: mes,
+        dias: lista_dias,
+      };
+    };
+
+    trabalhos_assincronos.push(trabalho_assincrono());
   }
+
+  const lista_ano = await Promise.all(trabalhos_assincronos);
   res.status(200).json(lista_ano);
 }
