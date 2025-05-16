@@ -122,7 +122,7 @@ npm install
 ### Configuração
 
 Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
-
+  - ⚠️ **Atenção:** O arquivo `.env` **não deve ser versionado**. Ele contém dados sensíveis.
 ```
 MONGO_URI=sua_uri_do_mongodb
 DB_NOME=nome_do_seu_banco_de_dados
