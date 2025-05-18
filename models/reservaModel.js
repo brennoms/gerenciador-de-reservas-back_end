@@ -24,6 +24,7 @@ export async function criarReserva(usuario_id, imovel_id, novaReserva) {
     valor: novaReserva.valor,
     data_inicio: dataInicio,
     data_fim: dataFim,
+    observacoes: novaReserva.observacoes,
   };
 
   const resultado = db.collection('reservas').insertOne(reserva);
