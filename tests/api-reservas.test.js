@@ -1,11 +1,34 @@
 import request from 'supertest';
 import app from '../index.js';
-import token from './utils/logar.js';
+import { loginOuCadastro } from './utils/logar.js';
 
+const token = await loginOuCadastro();
 const autorizacao = ['Authorization', `Bearer ${token}`];
+let imovel_id = null;
+
+beforeAll(async () => {
+  const urlImagem = 'https://picsum.photos/200';
+  const respostaImagem = await fetch(urlImagem);
+  const arrayBuffer = await respostaImagem.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  const res = await request(app)
+    .post('/api/imoveis')
+    .set('Authorization', `Bearer ${token}`)
+    .field('nome', 'Casa de Praia')
+    .field('endereco', 'Rua do Sol, 123')
+    .attach('imagem', buffer, 'casa.jpg');
+  imovel_id = res.body.imovel_id;
+});
+
+afterAll(async () => {
+  const res = await request(app)
+    .delete(`/api/imoveis/${imovel_id}`)
+    .set(...autorizacao);
+  expect(res.status).toBe(200);
+});
 
 describe('Testes de api reservas', () => {
-  let imovel_id = null;
   let reserva_id = null;
 
   const dataValida = { inicio: new Date(), fim: new Date() };
@@ -13,27 +36,6 @@ describe('Testes de api reservas', () => {
   dataValida.inicio = dataValida.inicio.toISOString().split('T')[0];
   dataValida.fim.setDate(dataValida.fim.getDate() + 2);
   dataValida.fim = dataValida.fim.toISOString().split('T')[0];
-
-  // Criar um imóvel para os testes de reserva
-  beforeAll(async () => {
-    const novoImovel = {
-      nome: 'Casa de Praia',
-      imagem: 'https://example.com/imagem.jpg',
-      endereco: 'Rua do Sol, 123',
-    };
-    const res = await request(app)
-      .post('/api/imoveis')
-      .set(...autorizacao)
-      .send(novoImovel);
-    imovel_id = res.body.imovel_id;
-    expect(res.status).toBe(200);
-  });
-  afterAll(async () => {
-    const res = await request(app)
-      .delete(`/api/imoveis/${imovel_id}`)
-      .set(...autorizacao);
-    expect(res.status).toBe(200);
-  });
 
   describe('POST /api/imoveis/:imovel_id/reservas', () => {
     it('deve retornar 200 e criar uma reserva', async () => {

@@ -1,6 +1,8 @@
 import request from 'supertest';
 import app from '../index.js';
-import token from './utils/logar.js';
+import { loginOuCadastro } from './utils/logar.js';
+
+const token = await loginOuCadastro();
 
 let imovel_id = null;
 
@@ -28,16 +30,21 @@ describe('Testes de api imoveis', () => {
 
   describe('POST /api/imoveis', () => {
     it('deve retornar 200 e adicionar um novo imóvel', async () => {
-      const novoImovel = {
-        nome: 'Casa de Praia',
-        imagem: 'https://example.com/imagem.jpg',
-        endereco: 'Rua do Sol, 123',
-      };
+      const urlImagem = 'https://picsum.photos/200';
+      const respostaImagem = await fetch(urlImagem);
+      const arrayBuffer = await respostaImagem.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
       const res = await request(app)
         .post('/api/imoveis')
         .set('Authorization', `Bearer ${token}`)
-        .send(novoImovel);
+        .field('nome', 'Casa de Praia')
+        .field('endereco', 'Rua do Sol, 123')
+        .attach('imagem', buffer, 'casa.jpg');
+
       expect(res.statusCode).toBe(200);
+      expect(res.body).toHaveProperty('imovel_id');
+
       imovel_id = res.body.imovel_id;
     });
 

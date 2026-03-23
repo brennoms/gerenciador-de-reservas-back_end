@@ -1,20 +1,25 @@
 import request from 'supertest';
 import app from '../../index.js';
 
-const usuario = {
+export const usuario = {
   nome: 'nome usuario',
-  email: 'email@teste.com',
+  email: 'usuario@teste.com',
   senha: 'usuariosenha',
 };
 
-const loginOuCadastro = async () => {
+export async function loginOuCadastro() {
   let res = await request(app).post('/api/usuarios/login').send({
     email: usuario.email,
     senha: usuario.senha,
   });
 
   if (res.statusCode === 401) {
-    await request(app).post('/api/usuarios/cadastro').send(usuario);
+    const codigo = (
+      await request(app).post('/api/usuarios/cadastro/codigo').send({ email: usuario.email })
+    ).body.codigo;
+    await request(app)
+      .post('/api/usuarios/cadastro')
+      .send({ ...usuario, codigo: codigo });
     res = await request(app).post('/api/usuarios/login').send({
       email: usuario.email,
       senha: usuario.senha,
@@ -22,6 +27,4 @@ const loginOuCadastro = async () => {
   }
 
   return res.body.token;
-};
-
-export default await loginOuCadastro();
+}

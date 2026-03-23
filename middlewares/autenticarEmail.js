@@ -12,6 +12,10 @@ export async function gerarCodigo(req, res) {
     const codigo = Math.floor(100000 + Math.random() * 900000); // Gera código de 6 dígitos
     salvarCodigo(email, String(codigo));
 
+    if (process.env.dev === 'true') {
+      return res.status(201).json({ codigo: String(codigo) });
+    }
+
     if ((await enviarCodigo(email, codigo)) === true) {
       res.status(201).json({ ok: true });
     } else {

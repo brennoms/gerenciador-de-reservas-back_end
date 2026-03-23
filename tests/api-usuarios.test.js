@@ -1,51 +1,85 @@
 import request from 'supertest';
 import app from '../index.js';
+import { usuario, loginOuCadastro } from './utils/logar.js';
+import { limparBanco, fecharConexao } from './utils/limparBanco.js';
+import { consultarCodigo } from '../utils/emailUtils.js';
+import { loginUsuario } from '../controllers/usuarioController.js';
 
 let token = null;
 
+beforeEach(async () => {
+  await limparBanco();
+});
+
+afterAll(async () => fecharConexao());
+
 describe('Testes de POST /api/usuarios/cadastro', () => {
   it('cadastro correto. status deve ser 201', async () => {
-    const res = await request(app).post('/api/usuarios/cadastro').send({
-      nome: 'nome_provisório',
-      email: 'email@provisorio.com',
-      senha: 'senha_provisória',
-    });
+    const codigo = (
+      await request(app).post('/api/usuarios/cadastro/codigo').send({ email: usuario.email })
+    ).body.codigo;
+    const res = await request(app)
+      .post('/api/usuarios/cadastro')
+      .send({
+        ...usuario,
+        codigo: codigo,
+      });
     expect(res.statusCode).toBe(201);
     expect(res.body.mensagem).toBe('Usuário cadastrado com sucesso.');
   });
 
   it('cadastro com dados faltando. status deve ser 400.', async () => {
-    const res = await request(app).post('/api/usuarios/cadastro').send({});
+    const codigo = (
+      await request(app).post('/api/usuarios/cadastro/codigo').send({ email: usuario.email })
+    ).body.codigo;
+    const res = await request(app)
+      .post('/api/usuarios/cadastro')
+      .send({ email: usuario.email, codigo: codigo });
     expect(res.body.erro).toBe('Todos os campos são obrigatórios.');
     expect(res.statusCode).toBe(400);
   });
 
   it('cadastro com email invalido. status deve ser 400.', async () => {
+    const codigo = (
+      await request(app).post('/api/usuarios/cadastro/codigo').send({ email: 'emailprovisório' })
+    ).body.codigo;
     const res = await request(app).post('/api/usuarios/cadastro').send({
       nome: 'nome_provisório',
       email: 'emailprovisório',
       senha: 'senha_provisória',
+      codigo: codigo,
     });
     expect(res.body.erro).toBe('E-mail inválido.');
     expect(res.statusCode).toBe(400);
   });
 
   it('cadastro com email repetido. status deve ser 400.', async () => {
-    const res = await request(app).post('/api/usuarios/cadastro').send({
-      nome: 'nome_provisório',
-      email: 'email@provisorio.com',
-      senha: 'senha_provisória',
-    });
-    expect(res.body.erro).toBe('E-mail já cadastrado.');
+    const codigo = (
+      await request(app).post('/api/usuarios/cadastro/codigo').send({ email: usuario.email })
+    ).body.codigo;
+    await request(app)
+      .post('/api/usuarios/cadastro')
+      .send({
+        ...usuario,
+        codigo: codigo,
+      });
+    const res = await request(app)
+      .post('/api/usuarios/cadastro')
+      .send({
+        ...usuario,
+        codigo: codigo,
+      });
     expect(res.statusCode).toBe(400);
+    expect(res.body.erro).toBe('E-mail já cadastrado.');
   });
 });
 
 describe('Testes de POST /api/usuarios/login', () => {
   it('login correto. status deve ser 200.', async () => {
+    await loginOuCadastro();
     const res = await request(app).post('/api/usuarios/login').send({
-      email: 'email@provisorio.com',
-      senha: 'senha_provisória',
+      email: usuario.email,
+      senha: usuario.senha,
     });
     expect(res.statusCode).toBe(200);
     token = res.body.token;
@@ -72,6 +106,7 @@ describe('Testes de POST /api/usuarios/login', () => {
 describe('Testes de /api/usuarios/me', () => {
   describe('Testes de GET /api/usuarios/me', () => {
     it('pegar usuario correto. status deve ser 200.', async () => {
+      token = await loginOuCadastro();
       const res = await request(app)
         .get('/api/usuarios/me')
         .set({ Authorization: `Bearer ${token}` });
