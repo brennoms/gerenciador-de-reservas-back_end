@@ -2,9 +2,9 @@ import request from 'supertest';
 import app from '../../index.js';
 
 const usuario = {
-  nome: process.env.USUARIO_NOME,
-  email: process.env.USUARIO_EMAIL,
-  senha: process.env.USUARIO_SENHA,
+  nome: 'nome usuario',
+  email: 'email@teste.com',
+  senha: 'usuariosenha',
 };
 
 const loginOuCadastro = async () => {
