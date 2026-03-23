@@ -1,7 +1,7 @@
-import 'dotenv/config';
 import dotenv from 'dotenv';
-dotenv.config({ path: './.test.env' });
-import app from './index.js';
+dotenv.config({ path: '.test.env' });
+
+const app = (await import('./index.js')).default;
 
 const port = process.env.PORT || 3000;
 if (process.env.IP_LOCAL) {
@@ -11,6 +11,6 @@ if (process.env.IP_LOCAL) {
   });
 } else {
   app.listen(port, () => {
-    console.log(`🚀 Servidor rodando na porta ${port}`);
+    console.log(`🚀 Servidor rodando na porta http://localhost:${port}`);
   });
 }
