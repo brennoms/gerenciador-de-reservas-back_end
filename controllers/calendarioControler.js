@@ -1,6 +1,6 @@
 import { buscarReservas } from '../models/reservaModel.js';
 
-const nome_mes = [
+const NOMES_MESES = [
   'janeiro',
   'fevereiro',
   'março',
@@ -21,118 +21,98 @@ export default async function handler(req, res) {
   let { ano, estado } = req.query;
   const token_invert_texto = process.env.TOKEN_INVERT_TEXTO;
 
-  if (!ano) {
-    return res.status(400).json({ erro: 'Ano não foi fornecido!' });
-  }
+  // Validação inicial
+  ano = parseInt(ano) || new Date().getFullYear();
   if (ano < 2000 || ano > 3000) {
-    return res.status(400).json({ erro: 'Ano invalido!' });
+    return res.status(400).json({ erro: 'Ano inválido!' });
   }
 
-  if (!ano) {
-    ano = new Date().getFullYear();
-  }
+  const hojeStr = new Date().toISOString().split('T')[0];
 
-  let feriados = {};
   try {
-    const resposta = await fetch(
-      `https://api.invertexto.com/v1/holidays/${ano}?token=${token_invert_texto}&state=${estado}`,
-      {
-        method: 'GET',
-      }
-    );
+    // 1. Busca de dados em paralelo para ganhar tempo
+    const [reservasRaw, feriadosRaw] = await Promise.all([
+      buscarReservas(usuario_id, imovel_id),
+      fetch(
+        `https://api.invertexto.com/v1/holidays/${ano}?token=${token_invert_texto}&state=${
+          estado || ''
+        }`
+      )
+        .then(r => (r.ok ? r.json() : []))
+        .catch(() => []), // Falha na API de feriados não deve travar o app
+    ]);
 
-    if (!resposta.ok) {
-      //return res.status(resposta.status).json({ erro: "Erro ao buscar feriados" })
-      feriados = [];
-    } else {
-      feriados = await resposta.json();
-    }
-  } catch (erro) {
-    return res.status(500).json({ erro: 'Erro interno no servidor' });
-  }
+    // 2. Otimização: Mapas para busca rápida O(1)
+    const feriadosMap = new Map(feriadosRaw.map(f => [f.date, f]));
 
-  let reservasFiltradas = [];
-  try {
-    //busca as reservas no banco de dados
-    const reservas = await buscarReservas(usuario_id, imovel_id);
-    reservasFiltradas = [];
-    for (const reserva of reservas) {
-      reservasFiltradas.push({ data_inicio: reserva.data_inicio, data_fim: reserva.data_fim });
-    }
-  } catch (erro) {
-    return res.status(500).json({ erro: 'Erro interno no banco de dados' });
-  }
+    // Para reservas, como é um intervalo, mantemos simplificado ou usamos um intervalo
+    const reservas = reservasRaw.map(r => ({
+      inicio: new Date(r.data_inicio).toISOString().split('T')[0],
+      fim: new Date(r.data_fim).toISOString().split('T')[0],
+    }));
 
-  let lista_ano = [];
-  for (let mes = 0; mes <= 11; mes++) {
-    let ultimo_dia_mes;
-    let primeiro_dia_da_semana = new Date(ano, mes, 1).getDay();
-    const dia_atual = new Date().toISOString().split('T')[0];
-    const lista_dias = [];
+    // Função auxiliar para construir o objeto do dia
+    const criarObjetoDia = dataObjeto => {
+      const isoDate = dataObjeto.toISOString().split('T')[0];
+      const dia = dataObjeto.getDate();
 
-    if (mes + 1 > 11) ultimo_dia_mes = new Date(ano + 1, 0, 0).getDate();
-    else ultimo_dia_mes = new Date(ano, mes + 1, 0).getDate();
-
-    for (let dia = 1; dia <= primeiro_dia_da_semana; dia++) {
-      const date = {
-        date: new Date(ano, mes, dia - primeiro_dia_da_semana).toISOString().split('T')[0],
+      const obj = {
+        date: isoDate,
+        dia: dia.toString().padStart(2, '0'),
       };
-      date.dia = date.date.split('-')[2];
-      for (const feriado of feriados) {
-        if (feriado['date'] === date['date']) {
-          date['feriado'] = feriado;
-        }
+
+      // Busca rápida de feriado
+      if (feriadosMap.has(isoDate)) obj.feriado = feriadosMap.get(isoDate);
+
+      // Verificação de reserva
+      const reservaEncontrada = reservas.find(r => isoDate >= r.inicio && isoDate <= r.fim);
+      if (reservaEncontrada) obj.reserva = reservaEncontrada;
+
+      if (isoDate === hojeStr) obj.dia_atual = true;
+
+      return obj;
+    };
+
+    // 3. Construção do Calendário
+    const lista_ano = [];
+
+    for (let mes = 0; mes < 12; mes++) {
+      const diasNoMes = [];
+
+      // Primeiro dia do mês e dia da semana (0-6)
+      const primeiroDiaData = new Date(ano, mes, 1);
+      const diaSemanaInicial = primeiroDiaData.getDay();
+
+      // Preenchimento: Dias do mês anterior para completar a primeira semana
+      for (let i = diaSemanaInicial; i > 0; i--) {
+        const d = new Date(ano, mes, 1 - i);
+        diasNoMes.push(criarObjetoDia(d));
       }
-      for (const reserva of reservasFiltradas) {
-        if (date.date >= reserva.data_inicio && date.date <= reserva.data_fim) {
-          date['reserva'] = reserva;
-          break;
-        }
+
+      // Dias do mês atual
+      const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
+      for (let d = 1; d <= ultimoDiaMes; d++) {
+        diasNoMes.push(criarObjetoDia(new Date(ano, mes, d)));
       }
-      if (new Date(ano, mes, dia).toISOString().split('T')[0] === dia_atual)
-        date['dia atual'] = true;
-      lista_dias.push(date);
+
+      // Preenchimento: Dias do próximo mês para completar a última semana (até fechar múltiplo de 7)
+      const diasRestantes = (7 - (diasNoMes.length % 7)) % 7;
+      for (let i = 1; i <= diasRestantes; i++) {
+        const d = new Date(ano, mes + 1, i);
+        diasNoMes.push(criarObjetoDia(d));
+      }
+
+      lista_ano.push({
+        ano,
+        mes_nome: NOMES_MESES[mes],
+        mes_numero: mes,
+        dias: diasNoMes,
+      });
     }
 
-    for (let dia = 1; dia <= ultimo_dia_mes; dia++) {
-      const date = { date: new Date(ano, mes, dia).toISOString().split('T')[0], dia };
-      for (const feriado of feriados) {
-        if (feriado['date'] === date['date']) {
-          date['feriado'] = feriado;
-        }
-      }
-      for (const reserva of reservasFiltradas) {
-        if (date.date >= reserva.data_inicio && date.date <= reserva.data_fim) {
-          date['reserva'] = reserva;
-          break;
-        }
-      }
-
-      if (new Date(ano, mes, dia).toISOString().split('T')[0] === dia_atual)
-        date['dia_atual'] = true;
-      lista_dias.push(date);
-    }
-
-    const dias_faltando = Math.ceil(lista_dias.length / 7) * 7 - lista_dias.length;
-    if (dias_faltando !== 0)
-      for (let dia = 0; dia < dias_faltando; dia++) {
-        const date = { date: new Date(ano, mes + 1, dia + 1).toISOString().split('T')[0] };
-        date.dia = date.date.split('-')[2];
-        for (const feriado of feriados) {
-          if (feriado['date'] === date['date']) {
-            date['feriado'] = feriado;
-          }
-        }
-        for (const reserva of reservasFiltradas) {
-          if (date.date >= reserva.data_inicio && date.date <= reserva.data_fim) {
-            date['reserva'] = reserva;
-            break;
-          }
-        }
-        lista_dias.push(date);
-      }
-
-    lista_ano.push({ ano: ano, mes_nome: nome_mes[mes], mes_numero: mes, dias: lista_dias });
+    return res.status(200).json(lista_ano);
+  } catch (erro) {
+    console.error(erro);
+    return res.status(500).json({ erro: 'Erro interno ao processar calendário' });
   }
-  res.status(200).json(lista_ano);
 }

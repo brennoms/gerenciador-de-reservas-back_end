@@ -6,7 +6,7 @@ const app = (await import('./index.js')).default;
 const port = process.env.PORT || 3000;
 if (process.env.IP_LOCAL) {
   const ip = process.env.IP_LOCAL;
-  app.listen(port, ip, () => {
+  app.listen(port, '0.0.0.0', () => {
     console.log(`🚀 Servidor rodando em http://${ip}:${port}`);
   });
 } else {

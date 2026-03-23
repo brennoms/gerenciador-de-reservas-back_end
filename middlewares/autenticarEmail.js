@@ -4,6 +4,11 @@ import { encontrarPorEmail } from '../models/usuarioModel.js';
 export async function gerarCodigo(req, res) {
   const { email } = req.body;
 
+  const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!regexEmail.test(email)) {
+    return res.status(400).json({ erro: 'E-mail inválido.' });
+  }
+
   try {
     if (await encontrarPorEmail(email)) {
       return res.status(400).json({ error: 'Usuário já cadastrado' });
