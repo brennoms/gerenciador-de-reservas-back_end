@@ -8,4 +8,10 @@ router.get('/', (req, res) => {
   });
 });
 
+router.get('/api', (req, res) => {
+  return res.status(200).json({
+    mensagem: 'conectado ao servidor gerenciador-de-reservas, use /api para acessar as features',
+  });
+});
+
 export default router;
