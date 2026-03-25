@@ -17,8 +17,8 @@ export function consultarCodigo(email, codigo) {
 
 export async function enviarCodigo(email, codigo) {
   try {
-    await resend.emails.send({
-      from: 'Gerenciador de Reservas <onboarding@resend.dev>',
+    const res = await resend.emails.send({
+      from: `Gerenciador de Reservas <no_reply@${process.env.EMAIL_DOMAIN}>`,
       to: email,
       subject: 'Código de Verificação',
       text: `Seu código de verificação é: ${codigo}. Ele expira em 5 minutos.`,
@@ -29,6 +29,11 @@ export async function enviarCodigo(email, codigo) {
         <p>Ele expira em 5 minutos.</p>
       `,
     });
+
+    if (res.error) {
+      console.log(res.error);
+      return false;
+    }
 
     return true;
   } catch (error) {

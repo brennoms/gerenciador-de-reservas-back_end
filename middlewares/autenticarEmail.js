@@ -14,7 +14,7 @@ export async function gerarCodigo(req, res) {
       return res.status(400).json({ error: 'Usuário já cadastrado' });
     }
 
-    const codigo = Math.floor(100000 + Math.random() * 900000); // Gera código de 6 dígitos
+    const codigo = Math.floor(100000 + Math.random() * 900000);
     salvarCodigo(email, String(codigo));
 
     if (process.env.dev === 'true') {
