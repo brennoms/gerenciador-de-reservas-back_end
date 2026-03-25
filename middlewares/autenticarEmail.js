@@ -21,11 +21,9 @@ export async function gerarCodigo(req, res) {
       return res.status(201).json({ codigo: String(codigo) });
     }
 
-    if ((await enviarCodigo(email, codigo)) === true) {
-      res.status(201).json({ ok: true });
-    } else {
-      res.status(500).json({ error: 'Falha ao enviar o código' });
-    }
+    enviarCodigo(email, codigo)
+    res.status(201).json({ ok: true });
+    
   } catch (err) {
     console.error('Erro ao enviar o código:', err);
     res.status(500).json({ error: 'Falha ao enviar o código' });
