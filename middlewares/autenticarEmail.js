@@ -34,6 +34,12 @@ export async function gerarCodigo(req, res) {
 
 export async function verificarCodigo(req, res, next) {
   const { email, codigo } = req.body;
+  const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!regexEmail.test(email)) {
+    return res.status(400).json({ erro: 'E-mail inválido.' });
+  }
+
   const valido = consultarCodigo(email, codigo);
   if (valido) {
     next();

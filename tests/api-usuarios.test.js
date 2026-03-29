@@ -2,8 +2,6 @@ import request from 'supertest';
 import app from '../index.js';
 import { usuario, loginOuCadastro } from './utils/logar.js';
 import { limparBanco, fecharConexao } from './utils/limparBanco.js';
-import { consultarCodigo } from '../utils/emailUtils.js';
-import { loginUsuario } from '../controllers/usuarioController.js';
 
 let token = null;
 
