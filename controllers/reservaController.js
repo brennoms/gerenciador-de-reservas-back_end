@@ -19,6 +19,10 @@ export async function fazerReserva(req, res) {
       return res.status(400).json({ erro: `Campo ${chave} é obrigatório` });
     }
   }
+
+  novaReserva.data_inicio = novaReserva.data_inicio.slice(0, 10);
+  novaReserva.data_fim = novaReserva.data_fim.slice(0, 10);
+
   if (!(novaReserva.data_inicio === novaReserva.data_fim)) {
     if (novaReserva.data_inicio >= novaReserva.data_fim) {
       return res.status(400).json({ erro: 'Data de início deve ser anterior à data de fim' });

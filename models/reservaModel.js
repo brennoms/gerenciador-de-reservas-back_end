@@ -5,8 +5,11 @@ import connect from './database.js';
 export async function criarReserva(usuario_id, imovel_id, novaReserva) {
   const db = await connect();
 
-  const [anoInicio, mesInicio, diaInicio] = novaReserva.data_inicio.split('-').map(Number);
-  const [anoFim, mesFim, diaFim] = novaReserva.data_fim.split('-').map(Number);
+  const [anoInicio, mesInicio, diaInicio] = novaReserva.data_inicio
+    .slice(0, 10)
+    .split('-')
+    .map(Number);
+  const [anoFim, mesFim, diaFim] = novaReserva.data_fim.slice(0, 10).split('-').map(Number);
 
   const dataInicio = new Date(Date.UTC(anoInicio, mesInicio - 1, diaInicio));
   const dataFim = new Date(Date.UTC(anoFim, mesFim - 1, diaFim));
