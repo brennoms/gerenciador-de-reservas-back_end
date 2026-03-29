@@ -102,3 +102,20 @@ export async function buscarReservasPorPeriodo(usuario_id, imovel_id, data_inici
 
   return reservas || [];
 }
+
+export async function atualizarReserva(usuario_id, imovel_id, reserva_id, dadosAtualizados) {
+  const db = await connect();
+
+  const resultado = await db.collection('reservas').updateOne(
+    {
+      _id: new ObjectId(reserva_id),
+      usuario_id: new ObjectId(usuario_id),
+      imovel_id: new ObjectId(imovel_id),
+    },
+    {
+      $set: dadosAtualizados,
+    }
+  );
+
+  return await buscarReserva(usuario_id, reserva_id);
+}

@@ -244,6 +244,161 @@ describe('Testes de api reservas', () => {
     });
   });
 
+  describe('PUT /api/imoveis/:imovel_id/reservas/:reserva_id', () => {
+    it('deve retornar 200 e atualizar a reserva', async () => {
+      const novaReserva = {
+        nome: 'João Silva',
+        contato: '(11) 98765-4321',
+        data_inicio: dataValida.inicio,
+        data_fim: dataValida.fim,
+        sinal: 500,
+        valor: 2500,
+        observacoes: 'Cliente deseja early check-in',
+      };
+      console.log('Atualizando reserva com ID:', reserva_id);
+      const res = await request(app)
+        .put(`/api/imoveis/${imovel_id}/reservas/${reserva_id}`)
+        .set(...autorizacao)
+        .send(novaReserva);
+      expect(res.status).toBe(200);
+    });
+
+    it('deve retornar 404 se a reserva não existir', async () => {
+      const novaReserva = {
+        nome: 'João Silva',
+        contato: '(11) 98765-4321',
+        data_inicio: dataValida.inicio,
+        data_fim: dataValida.fim,
+        sinal: 500,
+        valor: 2500,
+        observacoes: 'Cliente deseja early check-in',
+      };
+      const res = await request(app)
+        .put(`/api/imoveis/${imovel_id}/reservas/123456789012345678901234`)
+        .set(...autorizacao)
+        .send(novaReserva);
+      expect(res.status).toBe(404);
+    });
+
+    it('deve retornar 404 se o imóvel não existir', async () => {
+      const novaReserva = {
+        nome: 'João Silva',
+        contato: '(11) 98765-4321',
+        data_inicio: dataValida.inicio,
+        data_fim: dataValida.fim,
+        sinal: 500,
+        valor: 2500,
+        observacoes: 'Cliente deseja early check-in',
+      };
+      const res = await request(app)
+        .put('/api/imoveis/123456789012345678901234/reservas/123456789012345678901234')
+        .set(...autorizacao)
+        .send(novaReserva);
+      expect(res.status).toBe(404);
+    });
+
+    it('deve retornar 400 se data_inicio for anterior à data atual', async () => {
+      const novaReserva = {
+        nome: 'João Silva',
+        contato: '(11) 98765-4321',
+        data_inicio: '2023-10-10',
+        data_fim: '2023-10-15',
+        sinal: 500,
+        valor: 2500,
+        observacoes: 'Cliente deseja early check-in',
+      };
+      const res = await request(app)
+        .put(`/api/imoveis/${imovel_id}/reservas/${reserva_id}`)
+        .set(...autorizacao)
+        .send(novaReserva);
+      expect(res.status).toBe(400);
+    });
+
+    it('deve retornar 400 se data_inicio for maior ou igual à data_fim', async () => {
+      const novaReserva = {
+        nome: 'João Silva',
+        contato: '(11) 98765-4321',
+        data_inicio: '2023-10-25',
+        data_fim: '2023-10-20',
+        sinal: 500,
+        valor: 2500,
+        observacoes: 'Cliente deseja early check-in',
+      };
+      const res = await request(app)
+        .put(`/api/imoveis/${imovel_id}/reservas/${reserva_id}`)
+        .set(...autorizacao)
+        .send(novaReserva);
+      expect(res.status).toBe(400);
+    });
+
+    it('deve retornar 400 se data_fim for anterior à data atual', async () => {
+      const novaReserva = {
+        nome: 'João Silva',
+        contato: '(11) 98765-4321',
+        data_inicio: '2023-10-15',
+        data_fim: '2023-10-05',
+        sinal: 500,
+        valor: 2500,
+        observacoes: 'Cliente deseja early check-in',
+      };
+      const res = await request(app)
+        .put(`/api/imoveis/${imovel_id}/reservas/${reserva_id}`)
+        .set(...autorizacao)
+        .send(novaReserva);
+      expect(res.status).toBe(400);
+    });
+
+    it('deve retornar 400 se algum campo obrigatório estiver faltando', async () => {
+      const novaReserva = {
+        nome: 'João Silva',
+        contato: '(11) 98765-4321',
+        data_inicio: '2023-10-15',
+        data_fim: '2023-10-20',
+        sinal: 500,
+        valor: 2500,
+        observacoes: 'Cliente deseja early check-in',
+      };
+      const res = await request(app)
+        .put(`/api/imoveis/${imovel_id}/reservas/${reserva_id}`)
+        .set(...autorizacao)
+        .send(novaReserva);
+      expect(res.status).toBe(400);
+    });
+
+    it('deve retornar 401 se o token não for fornecido', async () => {
+      const novaReserva = {
+        nome: 'João Silva',
+        contato: '(11) 98765-4321',
+        data_inicio: '2023-10-15',
+        data_fim: '2023-10-20',
+        sinal: 500,
+        valor: 2500,
+        observacoes: 'Cliente deseja early check-in',
+      };
+      const res = await request(app)
+        .put(`/api/imoveis/${imovel_id}/reservas/${reserva_id}`)
+        .send(novaReserva);
+      expect(res.status).toBe(401);
+    });
+
+    it('deve retornar 403 se o token for inválido', async () => {
+      const novaReserva = {
+        nome: 'João Silva',
+        contato: '(11) 98765-4321',
+        data_inicio: '2023-10-15',
+        data_fim: '2023-10-20',
+        sinal: 500,
+        valor: 2500,
+        observacoes: 'Cliente deseja early check-in',
+      };
+      const res = await request(app)
+        .put(`/api/imoveis/${imovel_id}/reservas/${reserva_id}`)
+        .set('Authorization', 'Bearer token-invalido')
+        .send(novaReserva);
+      expect(res.status).toBe(403);
+    });
+  });
+
   describe('DELETE /api/imoveis/:imovel_id/reservas', () => {
     it('deve retornar 200 e deletar a reserva', async () => {
       const res = await request(app)

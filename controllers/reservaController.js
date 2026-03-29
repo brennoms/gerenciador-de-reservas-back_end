@@ -4,6 +4,7 @@ import {
   excluirReserva,
   buscarReserva,
   buscarReservasPorPeriodo,
+  atualizarReserva,
 } from '../models/reservaModel.js';
 import { buscarImovel } from '../models/imoveisModel.js';
 
@@ -103,5 +104,58 @@ export async function pegarReserva(req, res) {
     return res.status(200).json(reserva);
   } catch (error) {
     return res.status(500).json({ erro: 'Erro interno no servidor' });
+  }
+}
+
+export async function putReserva(req, res) {
+  const { usuario_id } = req.usuario;
+  const { reserva_id, imovel_id } = req.params;
+  const chavesObrigatorias = [
+    'nome',
+    'contato',
+    'data_inicio',
+    'data_fim',
+    'sinal',
+    'valor',
+    'observacoes',
+  ];
+  const novosDados = req.body;
+
+  for (const chave of chavesObrigatorias) {
+    if (!novosDados[chave]) {
+      return res.status(400).json({ erro: `Campo ${chave} é obrigatório` });
+    }
+  }
+
+  const data = {
+    nome: novosDados.nome,
+    contato: novosDados.contato,
+    sinal: novosDados.sinal,
+    valor: novosDados.valor,
+    data_inicio: novosDados.data_inicio,
+    data_fim: novosDados.data_fim,
+    observacoes: novosDados.observacoes,
+  };
+
+  try {
+    const reservaExistente = await buscarReserva(usuario_id, reserva_id);
+    if (!reservaExistente) {
+      return res.status(404).json({ erro: 'Reserva não encontrada' });
+    }
+
+    if (!(data.data_inicio === data.data_fim)) {
+      if (data.data_inicio >= data.data_fim) {
+        return res.status(400).json({ erro: 'Data de início deve ser anterior à data de fim' });
+      }
+      if (data.data_inicio < new Date().toISOString().split('T')[0]) {
+        return res.status(400).json({ erro: 'Data de início deve ser futura' });
+      }
+    }
+
+    const reserva_atualizada = await atualizarReserva(usuario_id, imovel_id, reserva_id, data);
+    return res.status(200).json(reserva_atualizada);
+  } catch (erro) {
+    console.error(erro);
+    return res.status(500).json({ erro: 'Erro ao atualizar reserva' });
   }
 }
