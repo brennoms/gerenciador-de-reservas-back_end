@@ -42,6 +42,9 @@ export async function fazerReserva(req, res) {
       return res.status(400).json({ erro: 'já existem reservas nesse periodo' });
     }
     const reserva = await criarReserva(usuario_id, imovel_id, novaReserva);
+    if (!reserva) {
+      return res.status(500).json({ erro: 'Erro ao criar reserva' });
+    }
     return res.status(200).json({ reserva_id: reserva.insertedId });
   } catch (error) {
     return res.status(500).json({ erro: 'Erro interno no servidor' });
