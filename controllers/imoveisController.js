@@ -1,4 +1,10 @@
-import { buscarImoveis, buscarImovel, criarImovel, excluirImovel } from '../models/imoveisModel.js';
+import {
+  buscarImoveis,
+  buscarImovel,
+  criarImovel,
+  excluirImovel,
+  atualizarImovel,
+} from '../models/imoveisModel.js';
 
 export async function adicionarImovel(req, res) {
   const { usuario_id } = req.usuario;
@@ -61,5 +67,33 @@ export async function pegarImoveis(req, res) {
   } catch (erro) {
     console.error(erro);
     return res.status(500).json({ erro: 'Erro ao buscar imóveis' });
+  }
+}
+
+export async function patchImovel(req, res) {
+  const { usuario_id } = req.usuario;
+  const { imovel_id } = req.params;
+  const { nome, endereco } = req.body;
+
+  if (!nome && !endereco) {
+    return res.status(400).json({ erro: 'Pelo menos um campo deve ser atualizado' });
+  }
+
+  try {
+    const imovelExistente = await buscarImovel(usuario_id, imovel_id);
+    if (!imovelExistente) {
+      return res.status(404).json({ erro: 'Imóvel não encontrado' });
+    }
+
+    const dadosAtualizados = {};
+    if (nome) dadosAtualizados.nome = nome;
+    if (endereco) dadosAtualizados.endereco = endereco;
+    if (req.file) dadosAtualizados.imagem_url = req.file.path;
+
+    await atualizarImovel(usuario_id, imovel_id, dadosAtualizados);
+    return res.status(200).json({ mensagem: 'Imóvel atualizado com sucesso' });
+  } catch (erro) {
+    console.error(erro);
+    return res.status(500).json({ erro: 'Erro ao atualizar imóvel' });
   }
 }

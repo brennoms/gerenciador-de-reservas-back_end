@@ -35,3 +35,19 @@ export async function buscarImoveis(usuario_id) {
     .toArray();
   return imoveis;
 }
+
+export async function atualizarImovel(usuario_id, imovel_id, dadosAtualizados) {
+  const db = await connect();
+
+  const resultado = await db.collection('imoveis').updateOne(
+    {
+      _id: new ObjectId(imovel_id),
+      usuario_id: new ObjectId(usuario_id),
+    },
+    {
+      $set: dadosAtualizados,
+    }
+  );
+
+  return resultado;
+}

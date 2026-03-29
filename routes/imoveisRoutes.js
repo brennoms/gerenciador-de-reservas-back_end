@@ -8,6 +8,7 @@ import {
   pegarImovel,
   adicionarImovel,
   removerImovel,
+  patchImovel,
 } from '../controllers/imoveisController.js';
 
 const upload = multer({ storage });
@@ -17,5 +18,6 @@ router.get('/imoveis', autenticarToken, pegarImoveis);
 router.post('/imoveis', autenticarToken, upload.single('imagem'), adicionarImovel);
 router.get('/imoveis/:imovel_id', autenticarToken, pegarImovel);
 router.delete('/imoveis/:imovel_id', autenticarToken, removerImovel);
+router.patch('/imoveis/:imovel_id', autenticarToken, upload.single('imagem'), patchImovel);
 
 export default router;

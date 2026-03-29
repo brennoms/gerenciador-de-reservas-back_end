@@ -114,6 +114,49 @@ describe('Testes de api imoveis', () => {
     });
   });
 
+  describe('PATCH /api/imoveis/:imovel_id', () => {
+    it('deve retornar 200 e atualizar o imóvel', async () => {
+      const res = await request(app)
+        .patch(`/api/imoveis/${imovel_id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ nome: 'Casa de Praia Atualizada' });
+      expect(res.statusCode).toBe(200);
+    });
+
+    it('deve retornar 404 se o imóvel não for encontrado', async () => {
+      const res = await request(app)
+        .patch('/api/imoveis/123456789abcdef123456789')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ nome: 'Casa de Praia Atualizada' });
+      expect(res.statusCode).toBe(404);
+      expect(res.body).toHaveProperty('erro', 'Imóvel não encontrado');
+    });
+
+    it('deve retornar 400 se nenhum campo for fornecido para atualização', async () => {
+      const res = await request(app)
+        .patch(`/api/imoveis/${imovel_id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({});
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toHaveProperty('erro', 'Pelo menos um campo deve ser atualizado');
+    });
+
+    it('deve retornar 401 se o token não for fornecido', async () => {
+      const res = await request(app)
+        .patch(`/api/imoveis/${imovel_id}`)
+        .send({ nome: 'Casa de Praia Atualizada' });
+      expect(res.statusCode).toBe(401);
+    });
+
+    it('deve retornar 403 se o token for inválido', async () => {
+      const res = await request(app)
+        .patch(`/api/imoveis/${imovel_id}`)
+        .set('Authorization', 'Bearer token-invalido')
+        .send({ nome: 'Casa de Praia Atualizada' });
+      expect(res.statusCode).toBe(403);
+    });
+  });
+
   describe('DELETE /api/imoveis/:imovel_id', () => {
     it('deve retornar 200 e excluir o imóvel', async () => {
       const res = await request(app)
