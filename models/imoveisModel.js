@@ -49,5 +49,5 @@ export async function atualizarImovel(usuario_id, imovel_id, dadosAtualizados) {
     }
   );
 
-  return resultado;
+  return await buscarImovel(usuario_id, imovel_id);
 }

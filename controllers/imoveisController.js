@@ -90,8 +90,8 @@ export async function patchImovel(req, res) {
     if (endereco) dadosAtualizados.endereco = endereco;
     if (req.file) dadosAtualizados.imagem_url = req.file.path;
 
-    await atualizarImovel(usuario_id, imovel_id, dadosAtualizados);
-    return res.status(200).json({ mensagem: 'Imóvel atualizado com sucesso' });
+    const imovel_atualizado = await atualizarImovel(usuario_id, imovel_id, dadosAtualizados);
+    return res.status(200).json(imovel_atualizado);
   } catch (erro) {
     console.error(erro);
     return res.status(500).json({ erro: 'Erro ao atualizar imóvel' });
