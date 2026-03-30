@@ -159,6 +159,19 @@ export async function putReserva(req, res) {
       }
     }
 
+    if (!(await buscarImovel(usuario_id, imovel_id))) {
+      return res.status(404).json({ erro: 'Imóvel não encontrado' });
+    }
+    const diasOcupados = await buscarReservasPorPeriodo(
+      usuario_id,
+      imovel_id,
+      novaReserva.data_inicio,
+      novaReserva.data_fim
+    );
+    if (diasOcupados.length > 0) {
+      return res.status(400).json({ erro: 'já existem reservas nesse periodo' });
+    }
+
     const reserva_atualizada = await atualizarReserva(usuario_id, imovel_id, reserva_id, data);
     return res.status(200).json(reserva_atualizada);
   } catch (erro) {
