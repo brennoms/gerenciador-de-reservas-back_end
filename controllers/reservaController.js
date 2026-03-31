@@ -8,6 +8,8 @@ import {
 } from '../models/reservaModel.js';
 import { buscarImovel } from '../models/imoveisModel.js';
 
+import { ObjectId } from 'mongodb';
+
 export async function fazerReserva(req, res) {
   const { imovel_id } = req.params;
   const { usuario_id } = req.usuario;
@@ -168,6 +170,8 @@ export async function putReserva(req, res) {
       data.data_inicio,
       data.data_fim
     );
+    const index = diasOcupados.findIndex(item => item._id === new ObjectId(reserva_id));
+    diasOcupados.splice(index, 1);
     if (diasOcupados.length > 0) {
       return res.status(400).json({ erro: 'já existem reservas nesse periodo' });
     }
