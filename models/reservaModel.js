@@ -109,6 +109,15 @@ export async function buscarReservasPorPeriodo(usuario_id, imovel_id, data_inici
 export async function atualizarReserva(usuario_id, imovel_id, reserva_id, dadosAtualizados) {
   const db = await connect();
 
+  const [anoInicio, mesInicio, diaInicio] = dadosAtualizados.data_inicio
+    .slice(0, 10)
+    .split('-')
+    .map(Number);
+  const [anoFim, mesFim, diaFim] = dadosAtualizados.data_fim.slice(0, 10).split('-').map(Number);
+
+  dadosAtualizados.data_inicio = new Date(Date.UTC(anoInicio, mesInicio - 1, diaInicio));
+  dadosAtualizados.data_fim = new Date(Date.UTC(anoFim, mesFim - 1, diaFim));
+
   const resultado = await db.collection('reservas').updateOne(
     {
       _id: new ObjectId(reserva_id),

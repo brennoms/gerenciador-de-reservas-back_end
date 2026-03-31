@@ -139,8 +139,8 @@ export async function putReserva(req, res) {
     contato: novosDados.contato,
     sinal: novosDados.sinal,
     valor: novosDados.valor,
-    data_inicio: novosDados.data_inicio,
-    data_fim: novosDados.data_fim,
+    data_inicio: novosDados.data_inicio.slice(0, 10),
+    data_fim: novosDados.data_fim.slice(0, 10),
     observacoes: novosDados.observacoes,
   };
 
@@ -165,8 +165,8 @@ export async function putReserva(req, res) {
     const diasOcupados = await buscarReservasPorPeriodo(
       usuario_id,
       imovel_id,
-      novaReserva.data_inicio,
-      novaReserva.data_fim
+      data.data_inicio,
+      data.data_fim
     );
     if (diasOcupados.length > 0) {
       return res.status(400).json({ erro: 'já existem reservas nesse periodo' });
